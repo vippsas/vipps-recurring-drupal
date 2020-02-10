@@ -1,5 +1,5 @@
 {
-    "name": "vipps_recurring_payments",
+    "name": "drupal/vipps_recurring_payments",
     "type": "drupal-module",
     "description": "Vipps recurring payments",
     "keywords": [
