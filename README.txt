@@ -1,1 +1,1 @@
-Vipps Recurring Payments
+Vipps Recurring Payments module
