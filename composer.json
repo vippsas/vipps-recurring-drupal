@@ -1,6 +1,7 @@
 {
     "name": "drupal/vipps_recurring_payments",
     "type": "drupal-module",
+    "license": "GPL-2.0+",
     "description": "Vipps recurring payments",
     "keywords": [
     ],
