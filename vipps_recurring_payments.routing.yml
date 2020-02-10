@@ -1,0 +1,25 @@
+vipps_recurring_payments.settings:
+  path: '/admin/structure/vipps-recurring-payments/settings'
+  defaults:
+    _form: '\Drupal\vipps_recurring_payments\Form\SettingsForm'
+    _title: 'VIPPS recurring payments configuration'
+  requirements:
+    _permission: 'administer site configuration'
+
+vipps_recurring_payments.test_auth:
+  path: '/vipps-recurring-payments/test/auth'
+  defaults:
+    _controller: Drupal\vipps_recurring_payments\Controller\TestController:auth
+  requirements:
+    _permission: 'authenticated'
+
+vipps_recurring_payments.make_charges:
+  path: '/vipps-recurring-payments/charge/make'
+  methods: [POST]
+  defaults:
+    _controller: Drupal\vipps_recurring_payments\Controller\ChargeController:make
+  options:
+    _auth: [ 'basic_auth' ]
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _format: json

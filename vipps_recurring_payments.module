@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains vipps_recurring_payments.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function vipps_recurring_payments_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the vipps_recurring_payments module.
+    case 'help.page.vipps_recurring':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Drupal 8 module for vipps recurring payments') . '</p>';
+      return $output;
+
+    default:
+  }
+}

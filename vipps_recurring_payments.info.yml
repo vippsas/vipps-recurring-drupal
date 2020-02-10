@@ -1,0 +1,7 @@
+name: 'Vipps recurring payments'
+type: module
+description: 'Drupal 8 module for vipps recurring payments'
+core: 8.x
+package: 'Custom'
+#dependencies:TODO fix bug with basic auth on devz
+#  - basic_auth

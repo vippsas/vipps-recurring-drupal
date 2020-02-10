@@ -1,0 +1,33 @@
+services:
+  vipps_recurring_payments:http_client:
+    class: Drupal\vipps_recurring_payments\Service\VippsHttpClient
+    arguments: ['@http_client', '@vipps_recurring_payments:api_config']
+
+  vipps_recurring_payments:api_config:
+    class: Drupal\vipps_recurring_payments\Service\VippsApiConfig
+    arguments: ['@config.factory']
+
+  vipps_recurring_payments:request_storage_factory:
+    class: Drupal\vipps_recurring_payments\Factory\RequestStorageFactory
+    arguments: [
+      '@vipps_recurring_payments:api_config',
+      '@config.factory',
+      '@vipps_recurring_payments:delay_manager',
+      '@vipps_recurring_payments:mobile_detect']
+
+  vipps_recurring_payments:delay_manager:
+    class: Drupal\vipps_recurring_payments\Service\DelayManager
+
+  vipps_recurring_payments:mobile_detect:
+    class: Detection\MobileDetect
+
+  vipps_recurring_payments:product_subscription_repository:
+    class: Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface
+
+  vipps_recurring_payments:vipps_service:
+    class: Drupal\vipps_recurring_payments\Service\VippsService
+    arguments: [
+      '@vipps_recurring_payments:http_client',
+      '@vipps_recurring_payments:request_storage_factory',
+      '@logger.factory',
+      '@vipps_recurring_payments:product_subscription_repository']

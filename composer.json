@@ -1,0 +1,23 @@
+{
+    "name": "vipps_recurring_payments",
+    "type": "drupal-module",
+    "description": "Vipps recurring payments",
+    "keywords": [
+    ],
+    "homepage": "https://www.drupal.org/project/vipps_recurring_payments",
+    "minimum-stability": "dev",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/vipps_recurring_payments",
+        "source": "http://cgit.drupalcode.org/vipps_recurring_payments"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ],
+    "require": {
+        "php": ">=7.2",
+        "mobiledetect/mobiledetectlib": "^2.8"
+    }
+}
