@@ -1,7 +1,7 @@
 # BKF Vipps recurring
 
 ### Make charges:
-* Endpoint: `/vipps-recurring/charge/make`
+* Endpoint: `/vipps-recurring-payments/charge/make`
 * Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
