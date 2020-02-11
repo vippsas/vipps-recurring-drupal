@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\vipps_recurring;
+namespace Drupal\vipps_recurring_payments;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceModifierInterface;
 use Drupal\vipps_recurring_payments\Repository\WebFormProductSubscriptionRepository;
 
-class VippsRecurringServiceProvider implements ServiceModifierInterface
+class VippsRecurringPaymentsServiceProvider implements ServiceModifierInterface
 {
   /**
    * Modifies existing service definitions.
