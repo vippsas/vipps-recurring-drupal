@@ -96,10 +96,6 @@ class VippsApiConfig {
   private function initializeAttributes():void
   {
     foreach ($this->configFactory->getRawData() as $attributeName => $value) {
-      if(is_null($value)) {
-        throw new \BadMethodCallException(sprintf("%s: attribute %s is empty", __CLASS__, $attributeName));
-      }
-
       $this->$attributeName = $value;
     }
   }
