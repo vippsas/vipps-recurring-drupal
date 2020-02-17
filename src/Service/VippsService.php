@@ -51,6 +51,14 @@ class VippsService
     return $response;
   }
 
+  public function agreementActive(string $agreementId):bool {
+    return $this->httpClient->getRetrieveAgreement($this->httpClient->auth(), $agreementId)->isActive();
+  }
+
+  public function agreementStatus(string $agreementId):string {
+    return $this->httpClient->getRetrieveAgreement($this->httpClient->auth(), $agreementId)->getStatus();
+  }
+
   private function createChargeItem(ChargeItem $chargeItem, string $token):string {
     $product = $this->productSubscriptionRepository->getProduct();
     $product->setPrice($chargeItem->getPrice());
