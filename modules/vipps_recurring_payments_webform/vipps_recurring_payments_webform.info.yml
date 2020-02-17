@@ -1,0 +1,9 @@
+name: 'vipps_recurring_payments_webform'
+type: module
+description: 'Vipps recurring payments webform'
+core: 8.x
+package: 'Custom'
+dependencies:
+  - vipps_recurring_payments
+  - webform
+  - webform_ui

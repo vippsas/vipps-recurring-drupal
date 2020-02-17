@@ -1,0 +1,6 @@
+vipps_recurring_payments_webform.confirm_agreement:
+  path: '/vrp-webform/confirm-agreement'
+  defaults:
+    _controller: Drupal\vipps_recurring_payments_webform\Controller\AgreementController:confirm
+  requirements:
+    _access: 'TRUE'
