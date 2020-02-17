@@ -61,12 +61,12 @@ class VippsApiConfig {
     return $this->base_url;
   }
 
-  public function getMerchantRedirectUrl():string {
-    return $this->merchant_redirect_url;
+  public function getMerchantRedirectUrl(array $params = []):string {
+    return $this->addGetParamsToUrl($this->merchant_redirect_url, $params);
   }
 
-  public function getMerchantAgreementUrl():string {
-    return $this->merchant_agreement_url;
+  public function getMerchantAgreementUrl(array $params = []):string {
+    return $this->addGetParamsToUrl($this->merchant_agreement_url, $params);
   }
 
   public function getAccessTokenRequestUrl():string {
@@ -103,5 +103,14 @@ class VippsApiConfig {
   private function generateUrl(string $path):string
   {
     return $this->getBaseUrl() . $path;
+  }
+
+  private function addGetParamsToUrl(string $url, array $params = []): string
+  {
+    if(empty($params)) {
+      return $url;
+    }
+
+    return $url . '?' . http_build_query($params);
   }
 }

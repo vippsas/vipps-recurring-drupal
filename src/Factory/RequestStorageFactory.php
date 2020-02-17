@@ -38,12 +38,13 @@ class RequestStorageFactory {
 
   public function buildDefaultDraftAgreement(
     ProductSubscriptionInterface $product,
-    string $phone
+    string $phone,
+    array $redirectPageGetParams = []
   ):DraftAgreementData {
     return new DraftAgreementData(
       $product,
-      $this->vippsApiConfig->getMerchantRedirectUrl(),
-      $this->vippsApiConfig->getMerchantAgreementUrl(),
+      $this->vippsApiConfig->getMerchantRedirectUrl($redirectPageGetParams),
+      $this->vippsApiConfig->getMerchantAgreementUrl($redirectPageGetParams),
       $phone,
       $this->mobileDetect->isMobile(),
       boolval($this->config->get('initial_charge'))
