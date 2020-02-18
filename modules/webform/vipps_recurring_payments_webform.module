@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Contains vipps_recurring_payments_webform.module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function vipps_recurring_payments_webform_uninstall() {
+  //DELETE vipps_recurring webform
+  $webformId = 'vipps_recurring';
+  $webformEntity = \Drupal::entityTypeManager()->getStorage('webform')->load($webformId);
+  if (!is_null($webformEntity)) {
+    $webformEntity->delete();
+  }
+}
