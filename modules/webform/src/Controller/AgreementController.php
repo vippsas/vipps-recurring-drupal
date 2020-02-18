@@ -7,11 +7,11 @@ use Drupal\vipps_recurring_payments\Service\VippsService;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\webform\Entity\WebformSubmission;
-use Drupal\webform\WebformSubmissionInterface;
+use Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Drupal\Core\Url;
 
 class AgreementController extends ControllerBase
 {
@@ -20,6 +20,8 @@ class AgreementController extends ControllerBase
   private $vippsService;
 
   private $logger;
+
+  private $submissionRepository;
 
   protected $messenger;
 
@@ -35,7 +37,8 @@ class AgreementController extends ControllerBase
     VippsService $vippsService,
     LoggerChannelFactoryInterface $loggerChannelFactory,
     ModuleHandlerInterface $module_handler,
-    Messenger $messenger
+    Messenger $messenger,
+    WebformSubmissionRepository $submissionRepository
   )
   {
     $this->request = $requestStack->getCurrentRequest();
@@ -43,19 +46,16 @@ class AgreementController extends ControllerBase
     $this->logger = $loggerChannelFactory;
     $this->moduleHandler = $module_handler;
     $this->messenger = $messenger;
+    $this->submissionRepository = $submissionRepository;
   }
 
   public function confirm()
   {
-    /* @var $submission WebformSubmissionInterface */
-    //TODO use repository for webforms
-    $submission = WebformSubmission::load($this->request->get('submission_id'));
+    $submission = $this->submissionRepository->getById(intval($this->request->get('submission_id')));
 
     try {
       $agreementStatus = $this->vippsService->agreementStatus($submission->getElementData('agreement_id'));
-      $submission->setElementData('agreement_status', $agreementStatus);
-      $submission->resave();
-
+      $this->submissionRepository->setStatus($submission, $agreementStatus);
 
       if( $this->vippsService->agreementActive($submission->getElementData('agreement_id'))) {
         $this->messenger->addMessage($this->t('Subscription has been done successfully'));
@@ -72,7 +72,7 @@ class AgreementController extends ControllerBase
       $this->logger->get('vipps')->error(sprintf("Agreement %s. ", $submission->get('agreement_id')) . $e->getMessage());
     }
 
-    return new RedirectResponse('<front>');
+    return new RedirectResponse(Url::fromRoute('<front>')->toString());
   }
 
   public static function create(ContainerInterface $container)
@@ -92,6 +92,9 @@ class AgreementController extends ControllerBase
     /* @var Messenger $messenger */
     $messenger = $container->get('messenger');
 
-    return new static($requestStack, $vippsService, $loggerFactory, $moduleHandler, $messenger);
+    /* @var WebformSubmissionRepository $submissionRepository */
+    $submissionRepository = $container->get('vipps_recurring_payments_webform:submission_repository');
+
+    return new static($requestStack, $vippsService, $loggerFactory, $moduleHandler, $messenger, $submissionRepository);
   }
 }

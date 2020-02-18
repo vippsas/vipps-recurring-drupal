@@ -1,0 +1,5 @@
+services:
+  vipps_recurring_payments_webform:submission_repository:
+    class: Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository
+    arguments:
+      - '@entity_type.manager'

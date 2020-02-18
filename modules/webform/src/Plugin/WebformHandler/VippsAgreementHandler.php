@@ -10,6 +10,7 @@ use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\vipps_recurring_payments\Factory\RequestStorageFactory;
 use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
+use Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository;
 use Drupal\webform\Annotation\WebformHandler;
 use Drupal\webform\Plugin\WebformHandlerBase;
 use Drupal\webform\WebformSubmissionConditionsValidatorInterface;
@@ -39,6 +40,8 @@ class VippsAgreementHandler extends WebformHandlerBase
 
   private $productSubscriptionRepository;
 
+  private $submissionRepository;
+
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -49,7 +52,8 @@ class VippsAgreementHandler extends WebformHandlerBase
     WebformSubmissionConditionsValidatorInterface $conditions_validator,
     VippsHttpClient $httpClient,
     RequestStorageFactory $requestStorageFactory,
-    ProductSubscriptionRepositoryInterface $productSubscriptionRepository
+    ProductSubscriptionRepositoryInterface $productSubscriptionRepository,
+    WebformSubmissionRepository $submissionRepository
   )
   {
     parent::__construct(
@@ -65,6 +69,7 @@ class VippsAgreementHandler extends WebformHandlerBase
     $this->httpClient = $httpClient;
     $this->requestStorageFactory = $requestStorageFactory;
     $this->productSubscriptionRepository = $productSubscriptionRepository;
+    $this->submissionRepository = $submissionRepository;
   }
 
   public function confirmForm(array &$form, FormStateInterface $formState, WebformSubmissionInterface $webFormSubmission)
@@ -82,9 +87,7 @@ class VippsAgreementHandler extends WebformHandlerBase
         )
       );
 
-      //TODO use repository for webforms
-      $webFormSubmission->setElementData('agreement_id', $draftAgreementResponse->getAgreementId());
-      $webFormSubmission->resave();
+      $this->submissionRepository->setAgreementId($webFormSubmission, $draftAgreementResponse->getAgreementId());
 
       new TrustedRedirectResponse($draftAgreementResponse->getVippsConfirmationUrl(), 302);
       $redirect = new RedirectResponse($draftAgreementResponse->getVippsConfirmationUrl(), 302);
@@ -125,6 +128,9 @@ class VippsAgreementHandler extends WebformHandlerBase
     /* @var ProductSubscriptionRepositoryInterface $productSubscriptionRepository */
     $productSubscriptionRepository = $container->get('vipps_recurring_payments:product_subscription_repository');
 
+    /* @var WebformSubmissionRepository $submissionRepository */
+    $submissionRepository = $container->get('vipps_recurring_payments_webform:submission_repository');
+
     return new static(
       $configuration,
       $plugin_id,
@@ -135,7 +141,8 @@ class VippsAgreementHandler extends WebformHandlerBase
       $conditionsValidator,
       $httpClient,
       $requestStorageFactory,
-      $productSubscriptionRepository
+      $productSubscriptionRepository,
+      $submissionRepository
     );
   }
 }
