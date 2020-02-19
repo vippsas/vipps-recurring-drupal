@@ -12,7 +12,7 @@ use Drupal\vipps_recurring_payments\RequestStorage\RequestStorageInterface;
 use Drupal\vipps_recurring_payments\Service\DelayManager;
 use Drupal\vipps_recurring_payments\Service\VippsApiConfig;
 use Drupal\vipps_recurring_payments\Entity\ProductSubscriptionInterface;
-use Detection\MobileDetect;
+use Drupal\vipps_recurring_payments\Service\Mobile_Detect;
 
 class RequestStorageFactory {
 
@@ -28,7 +28,7 @@ class RequestStorageFactory {
       VippsApiConfig $vippsApiConfig,
       ConfigFactoryInterface $configFactory,
       DelayManager $delayManager,
-      MobileDetect $mobileDetect
+      Mobile_Detect $mobileDetect
   ) {
     $this->vippsApiConfig = $vippsApiConfig;
     $this->config = $configFactory->getEditable(SettingsForm::SETTINGS);

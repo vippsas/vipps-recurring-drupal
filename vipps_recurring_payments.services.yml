@@ -19,7 +19,7 @@ services:
     class: Drupal\vipps_recurring_payments\Service\DelayManager
 
   vipps_recurring_payments:mobile_detect:
-    class: Detection\MobileDetect
+    class: Drupal\vipps_recurring_payments\Service\Mobile_Detect
 
   vipps_recurring_payments:product_subscription_repository:
     class: Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface
