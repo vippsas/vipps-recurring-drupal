@@ -1,4 +1,4 @@
-# BKF Vipps recurring
+# Vipps recurring payments
 
 ### Make charges:
 * Endpoint: `/vipps-recurring-payments/charge/make`

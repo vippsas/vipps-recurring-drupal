@@ -7,3 +7,4 @@ dependencies:
   - vipps_recurring_payments
   - webform
   - webform_ui
+  - advancedqueue

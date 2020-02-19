@@ -3,3 +3,10 @@ services:
     class: Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository
     arguments:
       - '@entity_type.manager'
+
+  vipps_recurring_payments_webform:agreement_service:
+    class: Drupal\vipps_recurring_payments_webform\Service\AgreementService
+    arguments:
+      - '@vipps_recurring_payments:http_client'
+      - '@logger.factory'
+      - '@vipps_recurring_payments_webform:submission_repository'

@@ -11,6 +11,8 @@ use Drupal\vipps_recurring_payments\UseCase\ChargeItem;
 use Drupal\vipps_recurring_payments\UseCase\Charges;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\vipps_recurring_payments\Factory\RequestStorageFactory;
+use Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository;
+use Drupal\webform\WebformSubmissionInterface;
 
 class VippsService
 {
@@ -59,7 +61,7 @@ class VippsService
     return $this->httpClient->getRetrieveAgreement($this->httpClient->auth(), $agreementId)->getStatus();
   }
 
-  private function createChargeItem(ChargeItem $chargeItem, string $token):string {
+  public function createChargeItem(ChargeItem $chargeItem, string $token):string {
     $product = $this->productSubscriptionRepository->getProduct();
     $product->setPrice($chargeItem->getPrice());
 
