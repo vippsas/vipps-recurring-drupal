@@ -6,6 +6,7 @@ namespace Drupal\vipps_recurring_payments\Service;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\vipps_recurring_payments\Form\SettingsForm;
+use Drupal\Core\Url;
 
 class VippsApiConfig {
 
@@ -25,11 +26,7 @@ class VippsApiConfig {
 
   protected $client_secret;
 
-  protected $base_url;
-
-  protected $merchant_redirect_url;
-
-  protected $merchant_agreement_url;
+  protected $test_mode;
 
   public function __construct(ConfigFactoryInterface $configFactory) {
 
@@ -58,15 +55,17 @@ class VippsApiConfig {
   }
 
   public function getBaseUrl():string {
-    return $this->base_url;
+    return $this->isTest() ? 'https://apitest.vipps.no' : 'https://api.vipps.no';
   }
 
   public function getMerchantRedirectUrl(array $params = []):string {
-    return $this->addGetParamsToUrl($this->merchant_redirect_url, $params);
+    $urlObject = Url::fromRoute('vipps_recurring_payments_webform.confirm_agreement', $params, ['absolute' => TRUE]);
+    return $urlObject->toString();
   }
 
   public function getMerchantAgreementUrl(array $params = []):string {
-    return $this->addGetParamsToUrl($this->merchant_agreement_url, $params);
+    $urlObject = Url::fromRoute('vipps_recurring_payments.merchant_agreement', $params, ['absolute' => TRUE]);
+    return $urlObject->toString();
   }
 
   public function getAccessTokenRequestUrl():string {
@@ -95,8 +94,18 @@ class VippsApiConfig {
 
   private function initializeAttributes():void
   {
-    foreach ($this->configFactory->getRawData() as $attributeName => $value) {
+    $rowData = $this->configFactory->getRawData();
+
+    foreach ($rowData as $attributeName => $value) {
       $this->$attributeName = $value;
+    }
+
+    if ($this->isTest()) {
+      $this->msn = $rowData['test_msn'];
+      $this->access_token = $rowData['test_access_token'];
+      $this->subscription_key = $rowData['test_subscription_key'];
+      $this->client_id = $rowData['test_client_id'];
+      $this->client_secret = $rowData['test_client_secret'];
     }
   }
 
@@ -105,12 +114,8 @@ class VippsApiConfig {
     return $this->getBaseUrl() . $path;
   }
 
-  private function addGetParamsToUrl(string $url, array $params = []): string
+  private function isTest():bool
   {
-    if(empty($params)) {
-      return $url;
-    }
-
-    return $url . '?' . http_build_query($params);
+    return boolval($this->test_mode);
   }
 }
