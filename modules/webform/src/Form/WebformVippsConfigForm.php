@@ -41,6 +41,18 @@ class WebformVippsConfigForm extends SettingsForm
         '#description' => 'Intervals are defined with a interval type MONTH, WEEK, or DAY and frequency as a count.
         E.g. Bi-weekly subscription: Interval = "WEEK", Interval count = "2"',
       ],
+      'agreement_title' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Agreement title'),
+        '#default_value' => $this->config->get('agreement_title') ?? $this->t('Agreement vipps'),
+        '#required' => true,
+      ],
+      'agreement_description' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Agreement description'),
+        '#default_value' => $this->config->get('agreement_description') ?? $this->t('Agreement vipps description'),
+        '#required' => true,
+      ],
     ], parent::getFormCustomAttributes());
   }
 }

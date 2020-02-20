@@ -13,7 +13,26 @@ class VippsProductSubscription implements ProductSubscriptionInterface
 
   private $price;
 
-  private $description = 'Testing Vipps recurring payment';//TODO set real description;
+  private $interval;
+
+  private $intervalCount;
+
+  private $title;
+
+  private $description;
+
+  public function __construct(
+    string $baseInterval,
+    int $baseIntervalCount,
+    string $title,
+    string $description
+  )
+  {
+    $this->setIntervalValue($baseInterval);
+    $this->setIntervalCount($baseIntervalCount);
+    $this->setDescription($description);
+    $this->setTitle($title);
+  }
 
   public function getId(): int
   {
@@ -22,17 +41,36 @@ class VippsProductSubscription implements ProductSubscriptionInterface
 
   public function getTitle(): string
   {
-    return "Vipps bkf"; //TODO real name
+    return $this->title;
+  }
+
+  public function setTitle(string $title):void
+  {
+    $this->title = $title;
+  }
+
+  public function setIntervalValue(string $interval): void
+  {
+    if(!in_array($interval, ['MONTH', 'WEEK', 'DAY'])) {
+      throw new \DomainException();
+    }
+
+    $this->interval = $interval;
   }
 
   public function getIntervalValue(): string
   {
-    return 'MONTH';
+    return $this->interval;
+  }
+
+  public function setIntervalCount(int $intervalCount): void
+  {
+    $this->intervalCount = $intervalCount;
   }
 
   public function getIntervalCount(): int
   {
-    return 1;
+    return $this->intervalCount;
   }
 
   public function getPrice(): ?float
@@ -55,6 +93,11 @@ class VippsProductSubscription implements ProductSubscriptionInterface
     return 'NOK';
   }
 
+  public function setDescription(string $description): void
+  {
+    $this->description = $description;
+  }
+
   public function getDescription(): string
   {
     return $this->description;
@@ -64,8 +107,16 @@ class VippsProductSubscription implements ProductSubscriptionInterface
     $this->price = round($price, 2) * 100;
   }
 
-  public function setDescription(string $description)
-  {
-    $this->description = $description;
+  public function getIntervalInDays():int {
+    switch ($this->getIntervalValue()) {
+      case "DAY":
+        return  1;
+      case "WEEK":
+        return 7;
+      case "MONTH":
+        return 30;//TODO check count days
+      default:
+        throw new \Exception("Interval isn't supported");
+    }
   }
 }

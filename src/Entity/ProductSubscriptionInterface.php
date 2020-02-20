@@ -10,6 +10,12 @@ interface ProductSubscriptionInterface
 
   public function getTitle():string;
 
+  public function setTitle(string $title):void;
+
+  public function setIntervalValue(string $interval): void;
+
+  public function setIntervalCount(int $intervalCount): void;
+
   public function getIntervalValue():string;
 
   public function getIntervalCount():int;
@@ -28,5 +34,5 @@ interface ProductSubscriptionInterface
 
   public function getIntervalInDays():int;
 
-  public function setDescription(string $description);
+  public function setDescription(string $description): void;
 }
