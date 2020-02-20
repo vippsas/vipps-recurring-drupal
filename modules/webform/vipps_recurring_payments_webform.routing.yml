@@ -4,3 +4,11 @@ vipps_recurring_payments_webform.confirm_agreement:
     _controller: Drupal\vipps_recurring_payments_webform\Controller\AgreementController:confirm
   requirements:
     _access: 'TRUE'
+
+vipps_recurring_payments_webform.settings:
+  path: '/admin/structure/vrp-webform/settings'
+  defaults:
+    _form: '\Drupal\vipps_recurring_payments_webform\Form\WebformVippsConfigForm'
+    _title: 'VIPPS recurring payments configuration'
+  requirements:
+    _permission: 'administer site configuration'

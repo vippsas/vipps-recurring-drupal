@@ -1,0 +1,6 @@
+vipps_recurring_payments.admin_settings_form:
+  title: 'VIPPS recurring payments webform configuration'
+  route_name: vipps_recurring_payments_webform.settings
+  description: 'VIPPS recurring payments configuration'
+  parent: system.admin_config_system
+  weight: 99
