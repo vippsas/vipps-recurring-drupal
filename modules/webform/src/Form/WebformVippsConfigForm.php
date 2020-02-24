@@ -17,42 +17,46 @@ class WebformVippsConfigForm extends SettingsForm
 
   public function getFormCustomAttributes(): array
   {
-    return array_merge([
-      'base_interval' => [
+    $parentAttributes = parent::getFormCustomAttributes();
+    $currentAttributes = [
+      'charge_interval' => [
         '#type' => 'select',
+        '#title' => $this->t('Charge interval'),
         '#required' => true,
-        '#title' => $this->t('Interval'),
-        '#default_value' => $this->config->get('base_interval') ?? 'MONTH',
+        '#weight' => 4,
+        '#default_value' => $this->config->get('charge_interval') ?? 'monthly',
         '#options' => [
-          'DAY' => $this->t('Day'),
-          'WEEK' => $this->t('Week'),
-          'MONTH' => $this->t('Month'),
-        ],
-        '#description' => 'Intervals are defined with a interval type MONTH, WEEK, or DAY and frequency as a count.
-        E.g. Bi-weekly subscription: Interval = "WEEK", Interval count = "2"',
-      ],
-      'base_interval_count' => [
-        '#type' => 'number',
-        '#min' => 1,
-        '#max' => 12,
-        '#required' => true,
-        '#title' => $this->t('Interval count'),
-        '#default_value' => $this->config->get('base_interval_count') ?? 1,
-        '#description' => 'Intervals are defined with a interval type MONTH, WEEK, or DAY and frequency as a count.
-        E.g. Bi-weekly subscription: Interval = "WEEK", Interval count = "2"',
+          'yearly' => $this->t('Yearly'),
+          'monthly' => $this->t('Monthly'),
+          'weekly' => $this->t('Weekly'),
+          'daily' => $this->t('Daily'),
+          ],
+        '#description' => 'How often make charges',
       ],
       'agreement_title' => [
         '#type' => 'textfield',
         '#title' => $this->t('Agreement title'),
         '#default_value' => $this->config->get('agreement_title') ?? $this->t('Agreement vipps'),
         '#required' => true,
+        '#weight' => 1,
+        '#description' => $this->t('The request parameter when creating an agreement'),
       ],
       'agreement_description' => [
         '#type' => 'textfield',
         '#title' => $this->t('Agreement description'),
         '#default_value' => $this->config->get('agreement_description') ?? $this->t('Agreement vipps description'),
         '#required' => true,
+        '#weight' => 1,
+        '#description' => $this->t('The request parameter when creating an agreement'),
       ],
-    ], parent::getFormCustomAttributes());
+    ];
+
+    $allAttributes = array_merge($currentAttributes, $parentAttributes);
+    usort($allAttributes,"cmp");
+    return $allAttributes;
+  }
+
+  private function cmp($a, $b) {
+    return $a['weight'] - $b['weight'];
   }
 }

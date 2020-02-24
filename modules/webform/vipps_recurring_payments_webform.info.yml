@@ -1,10 +1,9 @@
-name: 'vipps_recurring_payments_webform'
+name: 'Vipps Recurring Payments Webform'
 type: module
-description: 'Vipps recurring payments webform'
+description: 'Use Webform with Vipps Recurring Payments'
 core: 8.x
-package: 'Custom'
+package: 'Vipps'
 dependencies:
   - vipps_recurring_payments
   - webform
   - webform_ui
-  - advancedqueue

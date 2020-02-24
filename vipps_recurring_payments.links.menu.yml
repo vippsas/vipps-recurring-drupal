@@ -1,6 +1,6 @@
 vipps_recurring_payments.admin_settings_form:
-  title: 'VIPPS recurring payments configuration'
+  title: 'VIPPS Recurring Payments'
   route_name: vipps_recurring_payments.settings
-  description: 'VIPPS recurring payments configuration'
+  description: 'Configure API keys and settings'
   parent: system.admin_config_system
   weight: 99
