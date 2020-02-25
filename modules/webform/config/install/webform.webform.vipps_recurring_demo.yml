@@ -10,83 +10,37 @@ weight: 0
 uid: 1
 template: false
 archive: false
-id: vipps_recurring
-title: 'Vipps recurring'
+id: vipps_recurring_demo
+title: 'Vipps recurring demo'
 description: ''
 category: ''
 elements: |
-  gave:
-    '#type': fieldset
-    '#title': 'Monthly charge'
-    flexbox_02:
-      '#type': webform_flexbox
-      amount_select:
-        '#type': select
-        '#title': Amount
-        '#options':
-          250: '250 NOK'
-          400: '400 NOK'
-          500: '500 NOK'
-          0: 'Other amount'
-        '#empty_option': '-select-'
-        '#flex': '2'
-        '#states':
-          invisible:
-            ':input[name="amount_select"]':
-              value: '0'
-        '#states_clear': false
-        '#default_value': '250'
-        '#required': true
-      markup:
-        '#type': webform_markup
-        '#flex': '3'
-    flexbox_03:
-      '#type': webform_flexbox
-      amount:
-        '#type': textfield
-        '#title': Amount
-        '#flex': '2'
-        '#required': true
-        '#required_error': 'The field is required'
-        '#pattern': '[0-9]+'
-        '#pattern_error': 'Amount must be a whole number without decimals'
-        '#states':
-          visible:
-            ':input[name="amount_select"]':
-              value: '0'
-      markup_01:
-        '#type': webform_markup
-        '#flex': '3'
-  giver:
-    '#type': fieldset
-    '#title': 'About you'
-    container:
-      '#type': container
-      flexbox:
-        '#type': webform_flexbox
-        first_name:
-          '#type': textfield
-          '#title': 'First Name'
-          '#states_clear': false
-          '#required': true
-        last_name:
-          '#type': textfield
-          '#title': 'Last Name'
-          '#states_clear': false
-          '#required': true
-      flexbox_01:
-        '#type': webform_flexbox
-        phone:
-          '#type': tel
-          '#title': Phone
-          '#pattern': '[0-9]{8}'
-          '#pattern_error': 'Please enter a valid phone number, 8 numbers'
-          '#international_preferred_countries': {  }
-          '#flex': '2'
-          '#required': true
-        markup_04:
-          '#type': webform_markup
-          '#flex': '2'
+  amount:
+    '#type': textfield
+    '#title': Amount
+    '#required': true
+    '#required_error': 'The field is required'
+    '#pattern': '[0-9]+'
+    '#pattern_error': 'Amount must be a whole number without decimals'
+    '#flex': '2'
+  phone:
+    '#type': tel
+    '#title': Phone
+    '#pattern': '[0-9]{8}'
+    '#pattern_error': 'Please enter a valid phone number, 8 numbers'
+    '#international_preferred_countries': {  }
+    '#flex': '2'
+    '#required': true
+  first_name:
+    '#type': textfield
+    '#title': 'First Name'
+    '#states_clear': false
+    '#required': true
+  last_name:
+    '#type': textfield
+    '#title': 'Last Name'
+    '#states_clear': false
+    '#required': true
   agreement_id:
     '#type': hidden
     '#title': 'Vipps agreement ID'
