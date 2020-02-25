@@ -62,7 +62,7 @@ class SettingsForm extends ConfigFormBase{
     $configFactory->set('sub_module', 'web_form');//TODO remove it later
 
     foreach (array_keys($this->getFormCustomAttributes()) as $attribute) {
-      if($attribute === 'test_mode') {
+      if($attribute === 'test_env') {
         $this->setTestValues($form_state, $configFactory);
       } else {
         $configFactory->set($attribute, $form_state->getValue($attribute));
