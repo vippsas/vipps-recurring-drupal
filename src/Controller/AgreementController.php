@@ -6,14 +6,27 @@ namespace Drupal\vipps_recurring_payments\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\vipps_recurring_payments\Service\VippsService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class AgreementController extends ControllerBase
 {
   private $logger;
 
-  public function __construct(LoggerChannelFactoryInterface $loggerChannelFactory)
+  private $vippsService;
+
+  private $request;
+
+  public function __construct(
+    RequestStack $requestStack,
+    VippsService $vippsService,
+    LoggerChannelFactoryInterface $loggerChannelFactory
+  )
   {
+    $this->request = $requestStack->getCurrentRequest();
+    $this->vippsService = $vippsService;
     $this->logger = $loggerChannelFactory;
   }
 
@@ -22,11 +35,33 @@ class AgreementController extends ControllerBase
     $this->logger->get('vipps')->debug(json_encode($_POST, $_GET));
   }
 
+
+  public function cancel(){
+    try {
+      $requestContent = \GuzzleHttp\json_decode($this->request->getContent());
+      $agreementId = $requestContent->agreementId;
+
+      return new JsonResponse($this->vippsService->cancelAgreement($agreementId));
+
+    } catch (\Throwable $exception) {
+      return new JsonResponse([
+        'success' => false,
+        'error' => $exception->getMessage(),
+      ]);
+    }
+  }
+
   public static function create(ContainerInterface $container)
   {
+    /* @var RequestStack $requestStack */
+    $requestStack = $container->get('request_stack');
+
+    /* @var VippsService $vippsService */
+    $vippsService = $container->get('vipps_recurring_payments:vipps_service');
+
     /* @var $loggerFactory LoggerChannelFactoryInterface */
     $loggerFactory = $container->get('logger.factory');
 
-    return new static($loggerFactory);
+    return new static($requestStack, $vippsService, $loggerFactory);
   }
 }

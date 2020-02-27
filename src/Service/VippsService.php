@@ -75,4 +75,12 @@ class VippsService
     );
     return $this->httpClient->createCharge($token, $chargeItem->getAgreementId(), $request);
   }
+
+  public function cancelAgreement(string $agreementId) {
+    $token = $this->httpClient->auth();
+    $product = $this->productSubscriptionRepository->getProduct();
+    $request = $this->requestStorageFactory->buildCreateCancelData($product);
+    $response = $this->httpClient->updateAgreement($token, $agreementId, $request);
+    return $response;
+  }
 }

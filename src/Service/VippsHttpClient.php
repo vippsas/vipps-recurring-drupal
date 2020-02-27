@@ -100,7 +100,7 @@ class VippsHttpClient {
   }
 
   public function updateAgreement(string $token, string $agreementId, RequestStorageInterface $requestStorage){
-    $response = $this->httpClient->request('PUT', $this->config->getUpdateAgreementUrl($agreementId), [
+    $response = $this->httpClient->request('PATCH', $this->config->getUpdateAgreementUrl($agreementId), [
       'Accept' => 'application/json',
       'headers' => [
         'Content-Type' => 'application/json',

@@ -6,6 +6,7 @@ namespace Drupal\vipps_recurring_payments\Factory;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\vipps_recurring_payments\Form\SettingsForm;
+use Drupal\vipps_recurring_payments\RequestStorage\CancelAgreement;
 use Drupal\vipps_recurring_payments\RequestStorage\CreateChargeData;
 use Drupal\vipps_recurring_payments\RequestStorage\DraftAgreementData;
 use Drupal\vipps_recurring_payments\RequestStorage\RequestStorageInterface;
@@ -57,5 +58,9 @@ class RequestStorageFactory {
       $this->delayManager->getDayAfterTomorrow(),//two days in the future
       intval($this->config->get('charge_retry_days'))
     );
+  }
+
+  public function buildCreateCancelData(ProductSubscriptionInterface $product):RequestStorageInterface {
+    return new CancelAgreement($product);
   }
 }
