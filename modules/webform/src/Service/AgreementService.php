@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\vipps_recurring_payments_webform\Service;
 
 use Drupal\advancedqueue\Job;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
 use Drupal\vipps_recurring_payments\Service\DelayManager;
@@ -25,12 +26,20 @@ class AgreementService
 
   private $delayManager;
 
+  /**
+   * The module handler.
+   *
+   * @var ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
   public function __construct(
     VippsHttpClient $httpClient,
     LoggerChannelFactoryInterface $loggerChannelFactory,
     WebformSubmissionRepository $submissionRepository,
     ProductSubscriptionRepositoryInterface $productSubscriptionRepository,
-    DelayManager $delayManager
+    DelayManager $delayManager,
+    ModuleHandlerInterface $module_handler
   )
   {
     $this->httpClient = $httpClient;
@@ -38,6 +47,7 @@ class AgreementService
     $this->submissionRepository = $submissionRepository;
     $this->productSubscriptionRepository = $productSubscriptionRepository;
     $this->delayManager = $delayManager;
+    $this->moduleHandler = $module_handler;
   }
 
   public function confirmAgreementAndAddChargeTQueue(WebformSubmissionInterface $submission):void
@@ -59,6 +69,12 @@ class AgreementService
 
       throw new \DomainException('Something went wrong. Please contact to administrator');
     }
+
+    /**
+     * Invoke hook_vipps_recurring_payment_done and pass $submission
+     * This is useful so third party modules can do what ever they want after form submission and payment
+     */
+    $this->moduleHandler->invokeAll('vipps_recurring_payment_done', ['submission' => $submission]);
 
     $product = $this->productSubscriptionRepository->getProduct();
     $product->setPrice($this->getSubmissionAmount($submission));

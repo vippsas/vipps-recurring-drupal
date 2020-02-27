@@ -4,7 +4,6 @@ namespace Drupal\vipps_recurring_payments_webform\Controller;
 
 use Drupal\Core\Messenger\Messenger;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository;
 use Drupal\vipps_recurring_payments_webform\Service\AgreementService;
@@ -25,17 +24,9 @@ class AgreementController extends ControllerBase
 
   protected $messenger;
 
-  /**
-   * The module handler.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
   public function __construct(
     RequestStack $requestStack,
     LoggerChannelFactoryInterface $loggerChannelFactory,
-    ModuleHandlerInterface $module_handler,
     Messenger $messenger,
     WebformSubmissionRepository $submissionRepository,
     AgreementService $agreementService
@@ -43,7 +34,6 @@ class AgreementController extends ControllerBase
   {
     $this->request = $requestStack->getCurrentRequest();
     $this->logger = $loggerChannelFactory;
-    $this->moduleHandler = $module_handler;
     $this->messenger = $messenger;
     $this->submissionRepository = $submissionRepository;
     $this->agreementService = $agreementService;
@@ -55,7 +45,8 @@ class AgreementController extends ControllerBase
 
     try {
       $this->agreementService->confirmAgreementAndAddChargeTQueue($submission);
-      $this->messenger->addMessage($this->t('Subscription has been done successfully'));
+      $this->messenger->addMessage($this->t('Subscription has been done successfully: '. $submission->id()));
+
     } catch (\Throwable $e) {
       $this->messenger->addError($this->t($e->getMessage()));
     }
@@ -71,9 +62,6 @@ class AgreementController extends ControllerBase
     /* @var $loggerFactory LoggerChannelFactoryInterface */
     $loggerFactory = $container->get('logger.factory');
 
-    /* @var $moduleHandler ModuleHandlerInterface */
-    $moduleHandler = $container->get('module_handler');
-
     /* @var Messenger $messenger */
     $messenger = $container->get('messenger');
 
@@ -86,7 +74,6 @@ class AgreementController extends ControllerBase
     return new static(
       $requestStack,
       $loggerFactory,
-      $moduleHandler,
       $messenger,
       $submissionRepository,
       $agreementService
