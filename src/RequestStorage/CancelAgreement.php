@@ -19,10 +19,7 @@ class CancelAgreement implements RequestStorageInterface
   public function getData(): array
   {
     return [
-      'productName' => $this->product->getTitle(),
-      'price' => $this->product->getIntegerPrice(),
-      'productDescription' => $this->product->getDescription(),
-      'status' => self::STATUS,
+      'status' => self::STATUS
     ];
   }
 }
