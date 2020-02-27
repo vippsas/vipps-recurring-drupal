@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\vipps_recurring_payments\Service;
 
 use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
+use Drupal\vipps_recurring_payments\RequestStorage\RequestStorageInterface;
+use Drupal\vipps_recurring_payments\ResponseApiData\CancelAgreementResponse;
 use Drupal\vipps_recurring_payments\ResponseApiData\CreateChargesResponse;
 use Drupal\vipps_recurring_payments\ResponseApiData\ResponseErrorItem;
 use Drupal\vipps_recurring_payments\UseCase\ChargeItem;
@@ -76,11 +78,34 @@ class VippsService
     return $this->httpClient->createCharge($token, $chargeItem->getAgreementId(), $request);
   }
 
-  public function cancelAgreement(string $agreementId) {
+  public function cancelAgreement(array $agreementIds):CancelAgreementResponse {
     $token = $this->httpClient->auth();
+
+    $response = new CancelAgreementResponse();
+
     $product = $this->productSubscriptionRepository->getProduct();
     $request = $this->requestStorageFactory->buildCreateCancelData($product);
-    $response = $this->httpClient->updateAgreement($token, $agreementId, $request);
+
+    foreach ($agreementIds as $agreementId) {
+      $update = $this->updateAgreement($agreementId, $token, $request);
+      if ($update['success']) {
+        $response->addSuccessCancel($agreementId);
+      } else {
+        $response->addError($update[$agreementId]);
+      }
+    }
     return $response;
+  }
+
+  public function updateAgreement(string $agreementId, string $token, RequestStorageInterface $request)
+  {
+    try {
+    $response = $this->httpClient->updateAgreement($token, $agreementId, $request);
+      if ($response->agreementId ) {
+        return ['success' => TRUE, $agreementId => FALSE];
+      }
+    } catch (\Throwable $e) {
+      return ['success' => FALSE, $agreementId => new ResponseErrorItem($agreementId, $e->getMessage())];
+    }
   }
 }

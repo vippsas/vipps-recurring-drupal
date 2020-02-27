@@ -39,9 +39,8 @@ class AgreementController extends ControllerBase
   public function cancel(){
     try {
       $requestContent = \GuzzleHttp\json_decode($this->request->getContent());
-      $agreementId = $requestContent->agreementId;
 
-      return new JsonResponse($this->vippsService->cancelAgreement($agreementId));
+      return new JsonResponse($this->vippsService->cancelAgreement($requestContent)->toArray());
 
     } catch (\Throwable $exception) {
       return new JsonResponse([
