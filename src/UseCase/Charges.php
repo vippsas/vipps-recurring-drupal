@@ -29,7 +29,7 @@ class Charges {
         $charge->agreement_id,
         $charge->price,
         $charge->description ?? null,
-        $charge->chargeId ?? null
+        $charge->charge_id ?? null
       ));
     }
   }
