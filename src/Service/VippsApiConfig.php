@@ -80,7 +80,7 @@ class VippsApiConfig {
     return $this->generateUrl(sprintf("/recurring/v2/agreements/%s/charges", $orderId));
   }
 
-  public function getRetrieveAgreementUtl(string $agreementId):string {
+  public function getRetrieveAgreementUrl(string $agreementId):string {
     return $this->generateUrl(sprintf("/recurring/v2/agreements/%s", $agreementId));
   }
 

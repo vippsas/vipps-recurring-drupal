@@ -76,7 +76,7 @@ class VippsHttpClient {
   }
 
   public function getRetrieveAgreement(string $token, string $agreementId):AgreementData {
-    $response = $this->httpClient->request('GET', $this->config->getRetrieveAgreementUtl($agreementId), [
+    $response = $this->httpClient->request('GET', $this->config->getRetrieveAgreementUrl($agreementId), [
       'headers' => [
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
