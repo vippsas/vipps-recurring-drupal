@@ -136,6 +136,31 @@ class VippsHttpClient {
 
   }
 
+  public function refundCharge(string $token, string $agreementId, string $chargeId, RequestStorageInterface $requestStorage){
+    $response = $this->httpClient->request('POST', $this->config->getRefundUrl($agreementId, $chargeId), [
+      'headers' => [
+        'Content-Type' => 'application/json',
+        'Authorization' => "Bearer {$token}",
+        'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+        'Idempotency-Key' => "{$agreementId}_{$chargeId}_{$requestStorage->getData()['amount']}",
+      ],
+      'json' => $requestStorage->getData()
+    ]);
+
+    $statusCode = $response->getStatusCode();
+    if ($statusCode == 200) {
+      return array(
+        'status'      => $statusCode
+      );
+    } else {
+      return array(
+        'status'      => $statusCode,
+        'error'       => $this->getResponseBody($response)
+      );
+    }
+
+  }
+
   private function getResponseBody(ResponseInterface $response):\stdClass {
     return json_decode($response->getBody()->getContents());
   }

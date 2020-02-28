@@ -79,6 +79,35 @@ class VippsService
     return $response;
   }
 
+  public function refundCharges(Charges $chargesStorage):CreateChargesResponse {
+    $token = $this->httpClient->auth();
+
+    $response = new CreateChargesResponse();
+
+    foreach ($chargesStorage->getCharges() as $charge) {
+      try {
+        $product = $this->productSubscriptionRepository->getProduct();
+        $product->setPrice($charge->getPrice());
+        $request = $this->requestStorageFactory->buildCreateChargeData(
+          $product,
+          new \DateTime()
+        );
+
+        $refundResponse = $this->httpClient->refundCharge($token, $charge->getAgreementId(), $charge->getChargeId(), $request);
+        if ($refundResponse['status'] == 200 ) {
+          $response->addSuccessCharge($charge->getChargeId());
+        } else {
+           $response->addError(new ResponseErrorItem($charge->getChargeId(), \GuzzleHttp\json_encode($refundResponse)));
+        }
+      } catch (\Throwable $e) {
+         $response->addError(new ResponseErrorItem($charge->getChargeId(), $e->getMessage()));
+      }
+
+    }
+
+    return $response;
+  }
+
   public function agreementActive(string $agreementId):bool {
     return $this->httpClient->getRetrieveAgreement($this->httpClient->auth(), $agreementId)->isActive();
   }

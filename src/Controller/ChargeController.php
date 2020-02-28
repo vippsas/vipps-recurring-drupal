@@ -57,6 +57,20 @@ class ChargeController extends ControllerBase
     }
   }
 
+  public function refund(){
+    try {
+      $chargesStorage = new Charges($this->request->getContent());
+
+      return new JsonResponse($this->vippsService->refundCharges($chargesStorage)->toArray());
+
+    } catch (\Throwable $exception) {
+      return new JsonResponse([
+        'success' => false,
+        'error' => $exception->getMessage(),
+      ]);
+    }
+  }
+
   public static function create(ContainerInterface $container)
   {
     /* @var RequestStack $requestStack */

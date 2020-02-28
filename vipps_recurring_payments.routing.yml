@@ -35,6 +35,17 @@ vipps_recurring_payments.cancel_charges:
     _user_is_logged_in: 'TRUE'
     _format: json
 
+vipps_recurring_payments.refund_charges:
+  path: '/vipps-recurring-payments/charge/refund'
+  methods: [POST]
+  defaults:
+    _controller: Drupal\vipps_recurring_payments\Controller\ChargeController:refund
+  options:
+    _auth: [ 'basic_auth' ]
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _format: json
+
 vipps_recurring_payments.cancel_agreement:
   path: '/vipps-recurring-payments/agreement/cancel'
   methods: [PATCH]

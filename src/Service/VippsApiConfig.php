@@ -92,6 +92,10 @@ class VippsApiConfig {
     return $this->generateUrl(sprintf("/recurring/v2/agreements/%s/charges/%s", $agreementId, $chargeId));
   }
 
+  public function getRefundUrl(string $agreementId, string $chargeId):string {
+    return $this->generateUrl(sprintf("/recurring/v2/agreements/%s/charges/%s/refund", $agreementId, $chargeId));
+  }
+
   private function initializeAttributes():void
   {
     $rowData = $this->configFactory->getRawData();
