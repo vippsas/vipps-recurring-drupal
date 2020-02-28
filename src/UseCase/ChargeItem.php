@@ -12,11 +12,14 @@ class ChargeItem
 
   private $description;
 
-  public function __construct(string $id, int $price, string $description = null)
+  private $chargeId;
+
+  public function __construct(string $id, int $price, string $description = null, $chargeId = null)
   {
     $this->id = $id;
     $this->price = $price;
     $this->description = $description;
+    $this->chargeId = $chargeId;
   }
 
   public function getAgreementId():string {
@@ -29,6 +32,10 @@ class ChargeItem
 
   public function getDescription():string {
     return $this->description;
+  }
+
+  public function getChargeId():?string {
+    return $this->chargeId;
   }
 
   public function hasDescription():bool {

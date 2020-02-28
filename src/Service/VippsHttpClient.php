@@ -122,7 +122,18 @@ class VippsHttpClient {
       ],
     ]);
 
-    return $this->getResponseBody($response);
+    $statusCode = $response->getStatusCode();
+    if ($statusCode == 200) {
+      return array(
+        'status'      => $statusCode
+      );
+    } else {
+      return array(
+        'status'      => $statusCode,
+        'error'       => $this->getResponseBody($response)
+      );
+    }
+
   }
 
   private function getResponseBody(ResponseInterface $response):\stdClass {

@@ -55,6 +55,30 @@ class VippsService
     return $response;
   }
 
+  public function cancelCharges(Charges $chargesStorage):CreateChargesResponse {
+    $token = $this->httpClient->auth();
+
+    $response = new CreateChargesResponse();
+
+    foreach ($chargesStorage->getCharges() as $charge) {
+
+      try {
+        $cancelResponse = $this->httpClient->cancelCharge($token, $charge->getAgreementId(), $charge->getChargeId());
+        if ($cancelResponse['status'] == 200 ) {
+          $response->addSuccessCharge($charge->getChargeId());
+        } else {
+           $response->addError(new ResponseErrorItem($charge->getChargeId(), \GuzzleHttp\json_encode($cancelResponse)));
+        }
+      } catch (\Throwable $e) {
+         $response->addError(new ResponseErrorItem($charge->getChargeId(), $e->getMessage()));
+      }
+
+
+    }
+
+    return $response;
+  }
+
   public function agreementActive(string $agreementId):bool {
     return $this->httpClient->getRetrieveAgreement($this->httpClient->auth(), $agreementId)->isActive();
   }
@@ -97,12 +121,13 @@ class VippsService
     return $response;
   }
 
+
   public function updateAgreement(string $agreementId, string $token, RequestStorageInterface $request)
   {
     try {
-    $response = $this->httpClient->updateAgreement($token, $agreementId, $request);
+      $response = $this->httpClient->updateAgreement($token, $agreementId, $request);
       if ($response->agreementId ) {
-        return ['success' => TRUE, $agreementId => FALSE];
+        return ['success' => TRUE, $agreementId => TRUE];
       }
     } catch (\Throwable $e) {
       return ['success' => FALSE, $agreementId => new ResponseErrorItem($agreementId, $e->getMessage())];

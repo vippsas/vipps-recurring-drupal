@@ -24,6 +24,17 @@ vipps_recurring_payments.make_charges:
     _user_is_logged_in: 'TRUE'
     _format: json
 
+vipps_recurring_payments.cancel_charges:
+  path: '/vipps-recurring-payments/charge/cancel'
+  methods: [DELETE]
+  defaults:
+    _controller: Drupal\vipps_recurring_payments\Controller\ChargeController:cancel
+  options:
+    _auth: [ 'basic_auth' ]
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _format: json
+
 vipps_recurring_payments.cancel_agreement:
   path: '/vipps-recurring-payments/agreement/cancel'
   methods: [PATCH]
