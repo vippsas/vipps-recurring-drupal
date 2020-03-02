@@ -108,6 +108,22 @@ class VippsService
     return $response;
   }
 
+  public function getCharges(Charges $chargesStorage):CreateChargesResponse {
+    $token = $this->httpClient->auth();
+
+    $response = new CreateChargesResponse();
+
+    foreach ($chargesStorage->getCharges() as $charge) {
+      try {
+        $response->addSuccessCharge(\GuzzleHttp\json_encode($this->httpClient->getCharges($token, $charge->getAgreementId())));
+      } catch (\Throwable $e) {
+         $response->addError(new ResponseErrorItem($charge->getAgreementId(), $e->getMessage()));
+      }
+    }
+
+    return $response;
+  }
+
   public function agreementActive(string $agreementId):bool {
     return $this->httpClient->getRetrieveAgreement($this->httpClient->auth(), $agreementId)->isActive();
   }

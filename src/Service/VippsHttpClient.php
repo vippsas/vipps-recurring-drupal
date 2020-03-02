@@ -99,6 +99,17 @@ class VippsHttpClient {
     return new ChargeItemResponse($response);
   }
 
+  public function getCharges(string $token, string $agreementId) {
+    $response = $this->httpClient->request('GET', $this->config->getRetrieveChargesUrl($agreementId), [
+      'headers' => [
+        'Authorization' => "Bearer {$token}",
+        'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+      ],
+    ]);
+
+    return json_decode($response->getBody()->getContents());
+  }
+
   public function updateAgreement(string $token, string $agreementId, RequestStorageInterface $requestStorage){
     $response = $this->httpClient->request('PATCH', $this->config->getUpdateAgreementUrl($agreementId), [
       'Accept' => 'application/json',
