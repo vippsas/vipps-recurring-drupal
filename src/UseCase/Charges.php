@@ -27,7 +27,7 @@ class Charges {
     foreach ($decodedCharges as $charge) {
       array_push($this->charges, new ChargeItem(
         $charge->agreement_id,
-        $charge->price,
+        $charge->price ?? 0,
         $charge->description ?? null,
         $charge->charge_id ?? null
       ));
