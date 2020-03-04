@@ -48,6 +48,8 @@ class VippsAgreementsController extends ControllerBase implements ContainerInjec
    *
    * @return array
    *   An array suitable for drupal_render().
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function revisionShow($vipps_agreements_revision) {
     $vipps_agreements = $this->entityTypeManager()->getStorage('vipps_agreements')
@@ -65,6 +67,8 @@ class VippsAgreementsController extends ControllerBase implements ContainerInjec
    *
    * @return string
    *   The page title.
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function revisionPageTitle($vipps_agreements_revision) {
     $vipps_agreements = $this->entityTypeManager()->getStorage('vipps_agreements')
@@ -83,6 +87,8 @@ class VippsAgreementsController extends ControllerBase implements ContainerInjec
    *
    * @return array
    *   An array as expected by drupal_render().
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function revisionOverview(VippsAgreementsInterface $vipps_agreements) {
     $account = $this->currentUser();
