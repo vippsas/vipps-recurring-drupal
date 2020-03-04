@@ -23,7 +23,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\vipps_recurring_payments\VippsAgreementsListBuilder",
  *     "views_data" = "Drupal\vipps_recurring_payments\Entity\VippsAgreementsViewsData",
- *     "translation" = "Drupal\vipps_recurring_payments\VippsAgreementsTranslationHandler",
  *
  *     "form" = {
  *       "default" = "Drupal\vipps_recurring_payments\Form\VippsAgreementsForm",
@@ -37,20 +36,17 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "access" = "Drupal\vipps_recurring_payments\VippsAgreementsAccessControlHandler",
  *   },
  *   base_table = "vipps_agreements",
- *   data_table = "vipps_agreements_field_data",
  *   revision_table = "vipps_agreements_revision",
  *   revision_data_table = "vipps_agreements_field_revision",
- *   translatable = TRUE,
+ *   translatable = FALSE,
  *   admin_permission = "administer vipps agreements entities",
  *   entity_keys = {
  *     "id" = "id",
  *     "revision" = "vid",
- *     "uuid" = "uuid",
- *     "label" = "agreement_id",
- *     "mobile" = "mobile",
- *     "sgreement_status" = "sgreement_status",
+ *     "agreement_id" = "agreement_id",
+ *     "label" = "mobile",
+ *     "agreement_status" = "agreement_status",
  *     "price" = "price",
- *     "langcode" = "langcode",
  *     "published" = "status",
  *   },
  *   links = {
@@ -62,7 +58,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "revision" = "/admin/structure/vipps_agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/view",
  *     "revision_revert" = "/admin/structure/vipps_agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/revert",
  *     "revision_delete" = "/admin/structure/vipps_agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/delete",
- *     "translation_revert" = "/admin/structure/vipps_agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/revert/{langcode}",
  *     "collection" = "/admin/structure/vipps_agreements",
  *   },
  *   field_ui_base_route = "vipps_agreements.settings"

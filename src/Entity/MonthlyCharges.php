@@ -43,11 +43,10 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "revision" = "vid",
- *     "uuid" = "uuid",
  *     "published" = "status",
  *     "charge_id" = "charge_id",
  *     "charge_status" = "charge_status",
- *     "parent_id" = "parent_id",
+ *     "label" = "parent_id",
  *     "price" = "price",
  *     "description" = "description"
  *   },
@@ -91,6 +90,7 @@ class MonthlyCharges extends EditorialContentEntityBase implements MonthlyCharge
    */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
+
   }
 
   /**
