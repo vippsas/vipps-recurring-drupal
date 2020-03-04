@@ -1,0 +1,62 @@
+add vipps agreements entities:
+  title: 'Create new Vipps agreements entities'
+
+administer vipps agreements entities:
+  title: 'Administer Vipps agreements entities'
+  description: 'Allow to access the administration form to configure Vipps agreements entities.'
+  restrict access: true
+
+delete vipps agreements entities:
+  title: 'Delete Vipps agreements entities'
+
+edit vipps agreements entities:
+  title: 'Edit Vipps agreements entities'
+
+view published vipps agreements entities:
+  title: 'View published Vipps agreements entities'
+
+view unpublished vipps agreements entities:
+  title: 'View unpublished Vipps agreements entities'
+
+view all vipps agreements revisions:
+  title: 'View all Vipps agreements revisions'
+
+revert all vipps agreements revisions:
+  title: 'Revert all Vipps agreements revisions'
+  description: 'Role requires permission <em>view Vipps agreements revisions</em> and <em>edit rights</em> for vipps agreements entities in question or <em>administer vipps agreements entities</em>.'
+
+delete all vipps agreements revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Vipps agreements revisions</em> and <em>delete rights</em> for vipps agreements entities in question or <em>administer vipps agreements entities</em>.'
+
+add monthly charges entities:
+  title: 'Create new Monthly charges entities'
+
+administer monthly charges entities:
+  title: 'Administer Monthly charges entities'
+  description: 'Allow to access the administration form to configure Monthly charges entities.'
+  restrict access: true
+
+delete monthly charges entities:
+  title: 'Delete Monthly charges entities'
+
+edit monthly charges entities:
+  title: 'Edit Monthly charges entities'
+
+view published monthly charges entities:
+  title: 'View published Monthly charges entities'
+
+view unpublished monthly charges entities:
+  title: 'View unpublished Monthly charges entities'
+
+view all monthly charges revisions:
+  title: 'View all Monthly charges revisions'
+
+revert all monthly charges revisions:
+  title: 'Revert all Monthly charges revisions'
+  description: 'Role requires permission <em>view Monthly charges revisions</em> and <em>edit rights</em> for monthly charges entities in question or <em>administer monthly charges entities</em>.'
+
+delete all monthly charges revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Monthly charges revisions</em> and <em>delete rights</em> for monthly charges entities in question or <em>administer monthly charges entities</em>.'
+

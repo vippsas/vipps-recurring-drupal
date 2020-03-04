@@ -1,0 +1,52 @@
+# Vipps agreements routing definition
+vipps_agreements.settings_tab:
+  route_name: vipps_agreements.settings
+  title: 'Settings'
+  base_route: vipps_agreements.settings
+
+entity.vipps_agreements.canonical:
+  route_name: entity.vipps_agreements.canonical
+  base_route: entity.vipps_agreements.canonical
+  title: 'View'
+
+entity.vipps_agreements.edit_form:
+  route_name: entity.vipps_agreements.edit_form
+  base_route: entity.vipps_agreements.canonical
+  title: 'Edit'
+
+entity.vipps_agreements.version_history:
+  route_name: entity.vipps_agreements.version_history
+  base_route: entity.vipps_agreements.canonical
+  title: 'Revisions'
+
+entity.vipps_agreements.delete_form:
+  route_name:  entity.vipps_agreements.delete_form
+  base_route:  entity.vipps_agreements.canonical
+  title: Delete
+  weight: 10
+# Monthly charges routing definition
+monthly_charges.settings_tab:
+  route_name: monthly_charges.settings
+  title: 'Settings'
+  base_route: monthly_charges.settings
+
+entity.monthly_charges.canonical:
+  route_name: entity.monthly_charges.canonical
+  base_route: entity.monthly_charges.canonical
+  title: 'View'
+
+entity.monthly_charges.edit_form:
+  route_name: entity.monthly_charges.edit_form
+  base_route: entity.monthly_charges.canonical
+  title: 'Edit'
+
+entity.monthly_charges.version_history:
+  route_name: entity.monthly_charges.version_history
+  base_route: entity.monthly_charges.canonical
+  title: 'Revisions'
+
+entity.monthly_charges.delete_form:
+  route_name:  entity.monthly_charges.delete_form
+  base_route:  entity.monthly_charges.canonical
+  title: Delete
+  weight: 10

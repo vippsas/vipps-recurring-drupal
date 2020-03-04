@@ -1,0 +1,22 @@
+{#
+/**
+ * @file monthly_charges.html.twig
+ * Default theme implementation to present Monthly charges data.
+ *
+ * This template is used when viewing Monthly charges pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_monthly_charges()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('monthly_charges') }}>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</div>
