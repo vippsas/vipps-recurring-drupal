@@ -7,6 +7,8 @@ namespace Drupal\vipps_recurring_payments_webform\Service;
 use Drupal\advancedqueue\Job;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\vipps_recurring_payments\Entity\MonthlyCharges;
+use Drupal\vipps_recurring_payments\Entity\VippsAgreements;
 use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
 use Drupal\vipps_recurring_payments\Service\DelayManager;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
@@ -76,10 +78,49 @@ class AgreementService
      */
     $this->moduleHandler->invokeAll('vipps_recurring_payment_done', ['submission' => $submission]);
 
+    /**
+     * Create a Node of vipps_agreement type
+     */
+    $agreementNode = new VippsAgreements([
+      'type' => 'vipps_agreements',
+    ], 'vipps_agreements');
+    $agreementNode->set('status', 1);
+    $agreementNode->setStatus($agreementData->getStatus());
+    $agreementNode->setAgreementId($submission->getElementData('agreement_id'));
+    $agreementNode->setMobile($submission->getElementData('phone'));
+    $agreementNode->setPrice($submission->getElementData('amount'));
+
+    $agreementNode->save();
+    $agreementNodeId = $agreementNode->id();
+
+    /**
+     * Store first charge as monthly_charges entity
+     */
+    $charges = $this->httpClient->getCharges(
+      $this->httpClient->auth(),
+      $submission->getElementData('agreement_id')
+    );
+
+    if (isset($charges)) {
+      $chargeNode = new MonthlyCharges([
+        'type' => 'monthly_charges',
+      ], 'monthly_charges');
+      $chargeNode->set('status', 1);
+      $chargeNode->setChargeId($charges[0]->id);
+      $chargeNode->setPrice($charges[0]->amount);
+      $chargeNode->setParentId($agreementNodeId);
+      $chargeNode->setStatus($charges[0]->status);
+      $chargeNode->setDescription($charges[0]->description);
+      $chargeNode->save();
+    }
+
     $product = $this->productSubscriptionRepository->getProduct();
     $product->setPrice($this->getSubmissionAmount($submission));
 
-    $job = Job::create('create_charge_job', ['orderId' => $submission->getElementData('agreement_id')]);
+    $job = Job::create('create_charge_job', [
+      'orderId' => $submission->getElementData('agreement_id'),
+      'agreementNodeId' => $agreementNodeId
+    ]);
     $queue = Queue::load('default');//TODO use custom queue
     $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($product));
 
