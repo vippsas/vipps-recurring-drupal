@@ -7,8 +7,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
+use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
 use Drupal\vipps_recurring_payments\Factory\RequestStorageFactory;
-use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository;
 use Drupal\webform\Plugin\WebformHandlerBase;
@@ -37,8 +37,6 @@ class VippsAgreementHandler extends WebformHandlerBase
 
   private $requestStorageFactory;
 
-  private $productSubscriptionRepository;
-
   private $submissionRepository;
 
   public function __construct(
@@ -51,7 +49,6 @@ class VippsAgreementHandler extends WebformHandlerBase
     WebformSubmissionConditionsValidatorInterface $conditions_validator,
     VippsHttpClient $httpClient,
     RequestStorageFactory $requestStorageFactory,
-    ProductSubscriptionRepositoryInterface $productSubscriptionRepository,
     WebformSubmissionRepository $submissionRepository
   )
   {
@@ -67,7 +64,6 @@ class VippsAgreementHandler extends WebformHandlerBase
 
     $this->httpClient = $httpClient;
     $this->requestStorageFactory = $requestStorageFactory;
-    $this->productSubscriptionRepository = $productSubscriptionRepository;
     $this->submissionRepository = $submissionRepository;
   }
 
@@ -150,7 +146,6 @@ class VippsAgreementHandler extends WebformHandlerBase
 
 //    $values = $form_state->getValues();
 
-
 //    $form_state->setError($form['settings']['vipps']['agreement_title'], $values['vipps']['agreement_title']);
 //    $form_state->setValues($values);
   }
@@ -167,7 +162,12 @@ class VippsAgreementHandler extends WebformHandlerBase
   public function confirmForm(array &$form, FormStateInterface $formState, WebformSubmissionInterface $webFormSubmission)
   {
     try {
-      $product = $this->productSubscriptionRepository->getProduct();
+      $product = new VippsProductSubscription(
+        $this->getIntervals()['base_interval'],
+        intval($this->getIntervals()['base_interval_count']),
+        $this->configuration['agreement_title'],
+        $this->configuration['agreement_description']
+      );
       $product->setPrice($this->getAmount($formState));
 
       $draftAgreementResponse = $this->httpClient->draftAgreement(
@@ -188,6 +188,48 @@ class VippsAgreementHandler extends WebformHandlerBase
       $this->loggerFactory->get('vipps')->error($exception->getMessage());
     }
   }
+
+  private function getIntervals(): array
+  {
+    $chargeIntervals = $this->configuration['charge_interval'];
+    $intervals = array(
+      'base_interval'         => 'MONTH',
+      'base_interval_count'   => 1
+    );
+    if(!is_null($chargeIntervals)) {
+      switch ($chargeIntervals) {
+        case 'yearly':
+          $intervals = array(
+            'base_interval'         => 'MONTH',
+            'base_interval_count'   => 12
+          );
+          break;
+        case 'monthly':
+          $intervals = array(
+            'base_interval'         => 'MONTH',
+            'base_interval_count'   => 1
+          );
+          break;
+        case 'weekly':
+          $intervals = array(
+            'base_interval'         => 'WEEK',
+            'base_interval_count'   => 1
+          );
+          break;
+        case 'daily':
+          $intervals = array(
+            'base_interval'         => 'DAY',
+            'base_interval_count'   => 1
+          );
+          break;
+        default:
+          throw new \Exception('Unsupported interval');
+      }
+    }
+
+    return $intervals;
+  }
+
 
   private function getAmount(FormStateInterface $formState):?float
   {
@@ -217,9 +259,6 @@ class VippsAgreementHandler extends WebformHandlerBase
     /* @var RequestStorageFactory $requestStorageFactory */
     $requestStorageFactory = $container->get('vipps_recurring_payments:request_storage_factory');
 
-    /* @var ProductSubscriptionRepositoryInterface $productSubscriptionRepository */
-    $productSubscriptionRepository = $container->get('vipps_recurring_payments:product_subscription_repository');
-
     /* @var WebformSubmissionRepository $submissionRepository */
     $submissionRepository = $container->get('vipps_recurring_payments_webform:submission_repository');
 
@@ -233,7 +272,6 @@ class VippsAgreementHandler extends WebformHandlerBase
       $conditionsValidator,
       $httpClient,
       $requestStorageFactory,
-      $productSubscriptionRepository,
       $submissionRepository
     );
   }
