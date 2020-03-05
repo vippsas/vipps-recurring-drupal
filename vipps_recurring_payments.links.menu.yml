@@ -1,8 +1,14 @@
+system.vipps:
+  title: 'Vipps'
+  route_name: system.vipps
+  description: 'Edit Vipps settings'
+  parent: system.admin_config
+
 vipps_recurring_payments.admin_settings_form:
   title: 'VIPPS Recurring Payments'
   route_name: vipps_recurring_payments.settings
   description: 'Configure API keys and settings'
-  parent: system.admin_config_system
+  parent: system.vipps
   weight: 99
 
 # Vipps agreements menu items definition
@@ -10,25 +16,25 @@ entity.vipps_agreements.collection:
   title: 'Vipps agreements list'
   route_name: entity.vipps_agreements.collection
   description: 'List Vipps agreements entities'
-  parent: system.admin_structure
+  parent: system.vipps
   weight: 100
 
 vipps_agreements.admin.structure.settings:
   title: 'Vipps agreements settings'
   description: 'Configure Vipps agreements entities'
   route_name: vipps_agreements.settings
-  parent: system.admin_structure
+  parent: system.vipps
 
 # Monthly charges menu items definition
 entity.monthly_charges.collection:
   title: 'Monthly charges list'
   route_name: entity.monthly_charges.collection
   description: 'List Monthly charges entities'
-  parent: system.admin_structure
+  parent: system.vipps
   weight: 100
 
 monthly_charges.admin.structure.settings:
   title: 'Monthly charges settings'
   description: 'Configure Monthly charges entities'
   route_name: monthly_charges.settings
-  parent: system.admin_structure
+  parent: system.vipps

@@ -1,5 +1,12 @@
+system.vipps:
+  path: '/admin/config/vipps'
+  defaults:
+    _title: 'Vipps configuration options'
+  requirements:
+    _permission: 'administer site configuration'
+
 vipps_recurring_payments.settings:
-  path: '/admin/structure/vipps-recurring-payments/settings'
+  path: '/admin/config/vipps-recurring-payments/settings'
   defaults:
     _form: '\Drupal\vipps_recurring_payments\Form\SettingsForm'
     _title: 'VIPPS recurring payments configuration'

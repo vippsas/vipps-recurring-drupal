@@ -6,7 +6,7 @@ vipps_recurring_payments_webform.confirm_agreement:
     _access: 'TRUE'
 
 vipps_recurring_payments_webform.settings:
-  path: '/admin/structure/vrp-webform/settings'
+  path: '/admin/config/vrp-webform/settings'
   defaults:
     _form: '\Drupal\vipps_recurring_payments_webform\Form\WebformVippsConfigForm'
     _title: 'VIPPS recurring payments configuration'
