@@ -11,11 +11,9 @@ use Drupal\vipps_recurring_payments\Factory\RequestStorageFactory;
 use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository;
-use Drupal\webform\Annotation\WebformHandler;
 use Drupal\webform\Plugin\WebformHandlerBase;
 use Drupal\webform\WebformSubmissionConditionsValidatorInterface;
 use Drupal\webform\WebformSubmissionInterface;
-use Drupal\Core\Annotation\Translation;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -27,8 +25,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *   label = @Translation("Vipps agreement handler"),
  *   category = @Translation("Webform Handler"),
  *   description = @Translation("This handler submits data to Vipps and stores agreement ID"),
- *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_SINGLE,
+ *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_UNLIMITED,
  *   results = \Drupal\webform\Plugin\WebformHandlerInterface::RESULTS_PROCESSED,
+ *   submission = \Drupal\webform\Plugin\WebformHandlerInterface::SUBMISSION_OPTIONAL,
  * )
  */
 class VippsAgreementHandler extends WebformHandlerBase
@@ -71,6 +70,99 @@ class VippsAgreementHandler extends WebformHandlerBase
     $this->productSubscriptionRepository = $productSubscriptionRepository;
     $this->submissionRepository = $submissionRepository;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    return parent::defaultConfiguration() + [
+        'charge_interval'       => 'monthly',
+        'initial_charge'        => 1,
+        'agreement_title'       => '',
+        'agreement_description' => '',
+      ];
+  }
+
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+
+    $form['vipps_handler'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Recurring configurations'),
+      '#open' => TRUE,
+    ];
+
+    // Charge interval
+    $form['vipps_handler']['charge_interval'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Charge interval'),
+      '#required' => true,
+      '#options' => [
+        'monthly' => $this->t('Monthly'),
+        'weekly' => $this->t('Weekly'),
+        'daily' => $this->t('Daily'),
+        'yearly' => $this->t('Yearly'),
+      ],
+      '#default_value' => $this->configuration['charge_interval'],
+      '#description' => 'How often make charges'
+    ];
+
+    // Initial charge
+    $form['vipps_handler']['initial_charge'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Initial charge'),
+      '#description' => $this->t('Will be performed the initial charge when creating an agreement'),
+      '#default_value' => $this->configuration['initial_charge'],
+      '#return_value' => TRUE,
+    ];
+
+    // Agreement title
+    $form['vipps_handler']['agreement_title'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Agreement title'),
+      '#description' => $this->t('The request parameter when creating an agreement'),
+      '#default_value' => $this->configuration['agreement_title'],
+      '#return_value' => TRUE,
+    ];
+
+    // Agreement description
+    $form['vipps_handler']['agreement_description'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Agreement description'),
+      '#description' => $this->t('The request parameter when creating an agreement'),
+      '#default_value' => $this->configuration['agreement_description'],
+      '#return_value' => TRUE,
+    ];
+
+    $form = parent::buildConfigurationForm($form, $form_state);
+
+    return $this->setSettingsParents($form);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
+    parent::validateConfigurationForm($form, $form_state);
+
+//    $values = $form_state->getValues();
+
+
+//    $form_state->setError($form['settings']['vipps']['agreement_title'], $values['vipps']['agreement_title']);
+//    $form_state->setValues($values);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+    parent::submitConfigurationForm($form, $form_state);
+    $this->applyFormStateToConfiguration($form_state);
+  }
+
 
   public function confirmForm(array &$form, FormStateInterface $formState, WebformSubmissionInterface $webFormSubmission)
   {
