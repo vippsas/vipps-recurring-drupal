@@ -206,17 +206,6 @@ class SettingsForm extends ConfigFormBase{
           '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
         ],
       ],
-      'initial_charge' => [
-        '#type' => 'radios',
-        '#title' => $this->t('Initial charge'),
-        '#default_value' => $this->config->get('initial_charge') ?? 1,
-        '#options' => [
-          0 => $this->t('Off'),
-          1 => $this->t('On'),
-        ],
-        '#weight' => 2,
-        '#description' => $this->t('Will be performed the initial charge when creating an agreement'),
-      ],
       'charge_retry_days' => [
         '#type' => 'number',
         '#required' => true,
@@ -225,15 +214,6 @@ class SettingsForm extends ConfigFormBase{
         '#weight' => 2,
         '#description' => $this->t('Vipps will retry the charge for the number of days specified in "Retry days". If 0 it will be failed after the first attempt.')
       ],
-//      'sub_module' => [
-//        '#type' => 'radios',
-//        '#title' => $this->t('Sub module'),
-//        '#default_value' => $this->config->get('sub_module') ?? 'web_form',
-//        '#options' => [
-//          'web_form' => $this->t('Webform'),
-//          'commerce' => $this->t('Commerce'),
-//        ],
-//      ],
     ];
   }
 
