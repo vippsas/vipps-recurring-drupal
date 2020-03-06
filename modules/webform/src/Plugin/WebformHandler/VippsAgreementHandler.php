@@ -166,7 +166,8 @@ class VippsAgreementHandler extends WebformHandlerBase
         $this->getIntervals()['base_interval'],
         intval($this->getIntervals()['base_interval_count']),
         $this->configuration['agreement_title'],
-        $this->configuration['agreement_description']
+        $this->configuration['agreement_description'],
+        $this->configuration['initial_charge']
       );
       $product->setPrice($this->getAmount($formState));
 

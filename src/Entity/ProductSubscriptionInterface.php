@@ -35,4 +35,8 @@ interface ProductSubscriptionInterface
   public function getIntervalInDays():int;
 
   public function setDescription(string $description): void;
+
+  public function setInitialCharge(bool $initialCharge): void;
+
+  public function getInitialCharge(): bool;
 }

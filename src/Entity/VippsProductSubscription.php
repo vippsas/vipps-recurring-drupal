@@ -21,17 +21,21 @@ class VippsProductSubscription implements ProductSubscriptionInterface
 
   private $description;
 
+  private $initialCharge;
+
   public function __construct(
     string $baseInterval,
     int $baseIntervalCount,
     string $title,
-    string $description
+    string $description,
+    bool $initialCharge = true
   )
   {
     $this->setIntervalValue($baseInterval);
     $this->setIntervalCount($baseIntervalCount);
     $this->setDescription($description);
     $this->setTitle($title);
+    $this->setInitialCharge($initialCharge);
   }
 
   public function getId(): int
@@ -118,5 +122,15 @@ class VippsProductSubscription implements ProductSubscriptionInterface
       default:
         throw new \Exception("Interval isn't supported");
     }
+  }
+
+  public function setInitialCharge(bool $initialCharge): void
+  {
+    $this->initialCharge = $initialCharge;
+  }
+
+  public function getInitialCharge(): bool
+  {
+    return $this->initialCharge;
   }
 }

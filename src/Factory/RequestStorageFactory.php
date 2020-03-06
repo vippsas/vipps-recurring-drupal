@@ -47,8 +47,7 @@ class RequestStorageFactory {
       $this->vippsApiConfig->getMerchantRedirectUrl($redirectPageGetParams),
       $this->vippsApiConfig->getMerchantAgreementUrl($redirectPageGetParams),
       $phone,
-      $this->mobileDetect->isMobile(),
-      boolval($this->config->get('initial_charge'))
+      $this->mobileDetect->isMobile()
     );
   }
 

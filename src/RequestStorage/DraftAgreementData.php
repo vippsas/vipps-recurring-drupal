@@ -25,15 +25,14 @@ class DraftAgreementData implements RequestStorageInterface {
     string $merchantRedirectUrl,
     string $merchantAgreementUrl,
     string $customerPhoneNumber,
-    bool $isApp,
-    bool $initialCharge
+    bool $isApp
   ) {
     $this->product = $product;
     $this->merchantRedirectUrl = $merchantRedirectUrl;
     $this->merchantAgreementUrl = $merchantAgreementUrl;
     $this->customerPhoneNumber = $customerPhoneNumber;
     $this->isApp = $isApp;
-    $this->initialCharge = $initialCharge;
+    $this->initialCharge = $this->product->getInitialCharge();
   }
 
   public function getProduct():ProductSubscriptionInterface{
