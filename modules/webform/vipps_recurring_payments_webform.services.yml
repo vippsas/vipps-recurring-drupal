@@ -10,6 +10,5 @@ services:
       - '@vipps_recurring_payments:http_client'
       - '@logger.factory'
       - '@vipps_recurring_payments_webform:submission_repository'
-      - '@vipps_recurring_payments:product_subscription_repository'
       - '@vipps_recurring_payments:delay_manager'
       - '@module_handler'

@@ -162,9 +162,12 @@ class VippsAgreementHandler extends WebformHandlerBase
   public function confirmForm(array &$form, FormStateInterface $formState, WebformSubmissionInterface $webFormSubmission)
   {
     try {
+      $intervalService = \Drupal::service('vipps_recurring_payments:charge_intervals');
+      $intervals = $intervalService->getIntervals($this->configuration['charge_interval']);
+
       $product = new VippsProductSubscription(
-        $this->getIntervals()['base_interval'],
-        intval($this->getIntervals()['base_interval_count']),
+        $intervals['base_interval'],
+        intval($intervals['base_interval_count']),
         $this->configuration['agreement_title'],
         $this->configuration['agreement_description'],
         $this->configuration['initial_charge']
@@ -189,48 +192,6 @@ class VippsAgreementHandler extends WebformHandlerBase
       $this->loggerFactory->get('vipps')->error($exception->getMessage());
     }
   }
-
-  private function getIntervals(): array
-  {
-    $chargeIntervals = $this->configuration['charge_interval'];
-    $intervals = array(
-      'base_interval'         => 'MONTH',
-      'base_interval_count'   => 1
-    );
-    if(!is_null($chargeIntervals)) {
-      switch ($chargeIntervals) {
-        case 'yearly':
-          $intervals = array(
-            'base_interval'         => 'MONTH',
-            'base_interval_count'   => 12
-          );
-          break;
-        case 'monthly':
-          $intervals = array(
-            'base_interval'         => 'MONTH',
-            'base_interval_count'   => 1
-          );
-          break;
-        case 'weekly':
-          $intervals = array(
-            'base_interval'         => 'WEEK',
-            'base_interval_count'   => 1
-          );
-          break;
-        case 'daily':
-          $intervals = array(
-            'base_interval'         => 'DAY',
-            'base_interval_count'   => 1
-          );
-          break;
-        default:
-          throw new \Exception('Unsupported interval');
-      }
-    }
-
-    return $intervals;
-  }
-
 
   private function getAmount(FormStateInterface $formState):?float
   {

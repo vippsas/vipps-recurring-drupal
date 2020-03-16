@@ -9,7 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\vipps_recurring_payments\Entity\MonthlyCharges;
 use Drupal\vipps_recurring_payments\Entity\VippsAgreements;
-use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
+use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
 use Drupal\vipps_recurring_payments\Service\DelayManager;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments_webform\Repository\WebformSubmissionRepository;
@@ -24,8 +24,6 @@ class AgreementService
 
   private $submissionRepository;
 
-  private $productSubscriptionRepository;
-
   private $delayManager;
 
   /**
@@ -39,7 +37,6 @@ class AgreementService
     VippsHttpClient $httpClient,
     LoggerChannelFactoryInterface $loggerChannelFactory,
     WebformSubmissionRepository $submissionRepository,
-    ProductSubscriptionRepositoryInterface $productSubscriptionRepository,
     DelayManager $delayManager,
     ModuleHandlerInterface $module_handler
   )
@@ -47,12 +44,11 @@ class AgreementService
     $this->httpClient = $httpClient;
     $this->logger = $loggerChannelFactory;
     $this->submissionRepository = $submissionRepository;
-    $this->productSubscriptionRepository = $productSubscriptionRepository;
     $this->delayManager = $delayManager;
     $this->moduleHandler = $module_handler;
   }
 
-  public function confirmAgreementAndAddChargeTQueue(WebformSubmissionInterface $submission):void
+  public function confirmAgreementAndAddChargeToQueue(WebformSubmissionInterface $submission):void
   {
     $agreementData = $this->httpClient->getRetrieveAgreement(
       $this->httpClient->auth(),
@@ -78,6 +74,11 @@ class AgreementService
      */
     $this->moduleHandler->invokeAll('vipps_recurring_payment_done', ['submission' => $submission]);
 
+    $webform = $submission->getWebform();
+    $handlers = $webform->getHandlers();
+    $handlerConfig = $handlers->getConfiguration();
+    $configurations = $handlerConfig['vipps_agreement_handler'];
+
     /**
      * Create a Node of vipps_agreement type
      */
@@ -86,9 +87,10 @@ class AgreementService
     ], 'vipps_agreements');
     $agreementNode->set('status', 1);
     $agreementNode->setStatus($agreementData->getStatus());
+    $agreementNode->setIntervals($configurations['settings']['charge_interval'] ?? 'MONTHLY');
     $agreementNode->setAgreementId($submission->getElementData('agreement_id'));
     $agreementNode->setMobile($submission->getElementData('phone'));
-    $agreementNode->setPrice($submission->getElementData('amount'));
+    $agreementNode->setPrice($agreementData->getPrice());
 
     $agreementNode->save();
     $agreementNodeId = $agreementNode->id();
@@ -114,19 +116,32 @@ class AgreementService
       $chargeNode->save();
     }
 
-    $product = $this->productSubscriptionRepository->getProduct();
-    $product->setPrice($this->getSubmissionAmount($submission));
 
-    $job = Job::create('create_charge_job', [
-      'orderId' => $submission->getElementData('agreement_id'),
-      'agreementNodeId' => $agreementNodeId
-    ]);
-    $queue = Queue::load('default');//TODO use custom queue
-    $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($product));
+    if (isset($handlerConfig) && isset($handlerConfig['vipps_agreement_handler'])) {
+      $intervalService = \Drupal::service('vipps_recurring_payments:charge_intervals');
+      $intervals = $intervalService->getIntervals($configurations['settings']['charge_interval']);
 
-    $this->logger->get('vipps')->info(
-      sprintf("Subscription %s has been done successfully", $submission->getElementData('agreement_id'))
-    );
+      $product = new VippsProductSubscription(
+        $intervals['base_interval'],
+        intval($intervals['base_interval_count']),
+        $configurations['settings']['agreement_title'],
+        $configurations['settings']['agreement_description'],
+        boolval($configurations['settings']['initial_charge'])
+      );
+      $product->setPrice($this->getSubmissionAmount($submission));
+
+      $job = Job::create('create_charge_job', [
+        'orderId' => $submission->getElementData('agreement_id'),
+        'agreementNodeId' => $agreementNodeId
+      ]);
+      $queue = Queue::load('default');//TODO use custom queue
+      $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($product));
+
+      $this->logger->get('vipps')->info(
+        sprintf("Subscription %s has been done successfully", $submission->getElementData('agreement_id'))
+      );
+    }
+
   }
 
   private function getSubmissionAmount(WebformSubmissionInterface $webformSubmission):float {

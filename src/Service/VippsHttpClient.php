@@ -85,7 +85,7 @@ class VippsHttpClient {
 
     $responseData = $this->getResponseBody($response);
 
-    return new AgreementData($responseData->id, $responseData->status);
+    return new AgreementData($responseData->id, $responseData->status, $responseData->price);
   }
 
   public function getCharge(string $token, string $agreementId, string $chargeId):ChargeItemResponse{

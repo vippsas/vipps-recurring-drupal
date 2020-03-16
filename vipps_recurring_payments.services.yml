@@ -22,7 +22,7 @@ services:
     class: Drupal\vipps_recurring_payments\Service\Mobile_Detect
 
   vipps_recurring_payments:product_subscription_repository:
-    class: Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface
+    class: Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepository
 
   vipps_recurring_payments:vipps_service:
     class: Drupal\vipps_recurring_payments\Service\VippsService
@@ -31,3 +31,6 @@ services:
       '@vipps_recurring_payments:request_storage_factory',
       '@logger.factory',
       '@vipps_recurring_payments:product_subscription_repository']
+
+  vipps_recurring_payments:charge_intervals:
+    class: Drupal\vipps_recurring_payments\Service\ChargeIntervals

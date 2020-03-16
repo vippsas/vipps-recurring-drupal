@@ -28,8 +28,8 @@ class Charges {
       array_push($this->charges, new ChargeItem(
         $charge->agreement_id,
         $charge->price ?? 0,
-        $charge->description ?? null,
-        $charge->charge_id ?? null
+        $charge->description ?? '',
+        $charge->charge_id ?? ''
       ));
     }
   }

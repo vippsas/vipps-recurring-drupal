@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\vipps_recurring_payments\Entity;
 
 use Drupal\vipps_recurring_payments\Entity\IntervalInDaysTrait;
-use Drupal\vipps_recurring_payments\Entity\ProductSubscriptionInterface;
 
 class VippsProductSubscription implements ProductSubscriptionInterface
 {
@@ -24,10 +23,10 @@ class VippsProductSubscription implements ProductSubscriptionInterface
   private $initialCharge;
 
   public function __construct(
-    string $baseInterval,
-    int $baseIntervalCount,
-    string $title,
-    string $description,
+    string $baseInterval = 'MONTH',
+    int $baseIntervalCount = 1,
+    string $title = '',
+    string $description = '',
     bool $initialCharge = true
   )
   {

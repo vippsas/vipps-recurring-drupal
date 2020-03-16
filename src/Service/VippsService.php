@@ -6,6 +6,7 @@ namespace Drupal\vipps_recurring_payments\Service;
 
 use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
 use Drupal\vipps_recurring_payments\RequestStorage\RequestStorageInterface;
+use Drupal\vipps_recurring_payments\ResponseApiData\AgreementData;
 use Drupal\vipps_recurring_payments\ResponseApiData\CancelAgreementResponse;
 use Drupal\vipps_recurring_payments\ResponseApiData\CreateChargesResponse;
 use Drupal\vipps_recurring_payments\ResponseApiData\ResponseErrorItem;
@@ -88,6 +89,7 @@ class VippsService
       try {
         $product = $this->productSubscriptionRepository->getProduct();
         $product->setPrice($charge->getPrice());
+        $product->setDescription($charge->getDescription());
         $request = $this->requestStorageFactory->buildCreateChargeData(
           $product,
           new \DateTime()
@@ -103,6 +105,18 @@ class VippsService
          $response->addError(new ResponseErrorItem($charge->getChargeId(), $e->getMessage()));
       }
 
+    }
+
+    return $response;
+  }
+
+  public function getAgreement(string $agreementId) {
+    $token = $this->httpClient->auth();
+
+    try {
+      $response = \GuzzleHttp\json_encode($this->httpClient->getRetrieveAgreement($token, $agreementId));
+    } catch (\Throwable $e) {
+       $response = new ResponseErrorItem($agreementId, $e->getMessage());
     }
 
     return $response;

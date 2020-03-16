@@ -48,6 +48,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "agreement_status" = "agreement_status",
  *     "price" = "price",
  *     "published" = "status",
+ *     "agreement_intervals" = "agreement_intervals",
  *   },
  *   links = {
  *     "canonical" = "/admin/structure/vipps/vipps_agreements/{vipps_agreements}",
@@ -155,6 +156,21 @@ class VippsAgreements extends EditorialContentEntityBase implements VippsAgreeme
   /**
    * {@inheritdoc}
    */
+  public function getIntervals() {
+    return $this->get('agreement_intervals')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setIntervals($agreementIntervals) {
+    $this->set('agreement_intervals', $agreementIntervals);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
@@ -250,6 +266,28 @@ class VippsAgreements extends EditorialContentEntityBase implements VippsAgreeme
     $fields['agreement_status'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Agreement status'))
       ->setDescription(t('Agreement status. Possible values: PENDING, ACTIVE, STOPPED, EXPIRED'))
+      ->setRevisionable(TRUE)
+      ->setSettings([
+        'max_length' => 10,
+        'text_processing' => 0,
+      ])
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => -4,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => -4,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(TRUE);
+
+    $fields['agreement_intervals'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Agreement intervals'))
+      ->setDescription(t('How often agreement runs? MONTHLY, WEEKLY, YEARLY or DAILY'))
       ->setRevisionable(TRUE)
       ->setSettings([
         'max_length' => 10,

@@ -77,4 +77,9 @@ class ChargeItemResponse
     return $this->type;
   }
 
+  public function getStatus():string
+  {
+    return $this->status;
+  }
+
 }

@@ -4,11 +4,15 @@ namespace Drupal\vipps_recurring_payments_webform\Plugin\AdvancedQueue\JobType;
 
 use Drupal\advancedqueue\Annotation\AdvancedQueueJobType;
 use Drupal\Core\Annotation\Translation;
+use Drupal\vipps_recurring_payments\Service\DelayManager;
 use Drupal\advancedqueue\Job;
 use Drupal\advancedqueue\JobResult;
+use Drupal\advancedqueue\Entity\Queue;
 use Drupal\advancedqueue\Plugin\AdvancedQueue\JobType\JobTypeBase;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\vipps_recurring_payments\Entity\MonthlyCharges;
+use Drupal\vipps_recurring_payments\Entity\VippsAgreements;
 use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments\Service\VippsService;
@@ -34,12 +38,15 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
 
   private $httpClient;
 
+  private $delayManager;
+
   public function __construct(
     LoggerChannelFactoryInterface $loggerChannelFactory,
     ProductSubscriptionRepositoryInterface $productSubscriptionRepository,
     WebformSubmissionRepository $submissionRepository,
     VippsService $vippsService,
-    VippsHttpClient $httpClient
+    VippsHttpClient $httpClient,
+    DelayManager $delayManager
   )
   {
     $this->product = $productSubscriptionRepository->getProduct();
@@ -47,6 +54,7 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
     $this->vippsService = $vippsService;
     $this->submissionRepository = $submissionRepository;
     $this->httpClient = $httpClient;
+    $this->delayManager = $delayManager;
   }
 
   /**
@@ -56,12 +64,43 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
     try {
       $payload = $job->getPayload();
 
-      $this->vippsService->createChargeItem(
-        new ChargeItem($payload['orderId'], $this->product->getIntegerPrice()),
+      $agreementId = $payload['orderId'];
+      $agreementNodeId = $payload['agreementNodeId'];
+      $agreementNode = VippsAgreements::load($agreementNodeId);
+      $agreementNode->getPrice();
+
+      $chargeId = $this->vippsService->createChargeItem(
+        new ChargeItem($agreementId, $this->product->getIntegerPrice()),
         $this->httpClient->auth()
       );
 
-      //TODO save charge to database
+      // Get charge
+      $charge = $this->httpClient->getCharge($this->httpClient->auth(), $agreementId, $chargeId);
+      // Store charge in monthly_charges entity
+      if (isset($charge)) {
+        $chargeNode = new MonthlyCharges([
+          'type' => 'monthly_charges',
+        ], 'monthly_charges');
+        $chargeNode->set('status', 1);
+        $chargeNode->setChargeId($chargeId);
+        $chargeNode->setPrice($charge->getAmount());
+        $chargeNode->setParentId($agreementId);
+        $chargeNode->setStatus($charge->getStatus());
+        $chargeNode->setDescription($charge->getDescription());
+        $chargeNode->save();
+
+        // Add new job to queue for the next charge
+        $job = Job::create('create_charge_job', [
+          'orderId' => $agreementId,
+          'agreementNodeId' => $agreementNodeId
+        ]);
+        $queue = Queue::load('default'); //TODO use custom queue
+        $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($this->product));
+
+        $this->logger->info(
+          sprintf("Charge for %s has been done successfully", $agreementId)
+        );
+      }
 
       return JobResult::success();
     } catch (\Throwable $e) {
@@ -86,12 +125,16 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
     /* @var VippsHttpClient $httpClient */
     $httpClient = $container->get('vipps_recurring_payments:http_client');
 
+    /* @var DelayManager $delayManager */
+    $delayManager = $container->get('vipps_recurring_payments:delay_manager');
+
     return new static(
       $loggerFactory,
       $productSubscriptionRepository,
       $submissionRepository,
       $vippsService,
-      $httpClient
+      $httpClient,
+      $delayManager
     );
   }
 }

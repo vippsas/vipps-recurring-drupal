@@ -98,6 +98,30 @@ interface VippsAgreementsInterface extends ContentEntityInterface, RevisionLogIn
   public function setStatus($status);
 
   /**
+   * Gets the intervals of the agreement.
+   *
+   * @return string
+   *   Agreements intervals
+   */
+  public function getIntervals();
+
+  /**
+   * Sets the intervals of the agreement.
+   *
+   * @param string $intervals
+   *   Agreements intervals.
+   *
+   * Possible values:
+   * - YEARLY
+   * - MONTHLY
+   * - WEEKLY
+   * - DAILY
+   *
+   * @return VippsAgreementsInterface
+   */
+  public function setIntervals($intervals);
+
+  /**
    * Gets the Vipps agreements creation timestamp.
    *
    * @return int

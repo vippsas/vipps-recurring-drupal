@@ -15,13 +15,16 @@ class AgreementData
 
   private $status;
 
-  public function __construct(string $id, string $status)
+  private $price;
+
+  public function __construct(string $id, string $status, int $price)
   {
     if(!$this->statusValid($status)) {
       throw new \DomainException('Unsupported status');
     }
     $this->id = $id;
     $this->status = $status;
+    $this->price = $price;
   }
 
   public function getStatuses():array {
@@ -38,6 +41,10 @@ class AgreementData
 
   public function getStatus():string {
     return $this->status;
+  }
+
+  public function getPrice():int {
+    return $this->price;
   }
 
   public function isActive():bool {
