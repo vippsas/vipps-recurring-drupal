@@ -44,7 +44,7 @@ class AgreementController extends ControllerBase
     $submission = $this->submissionRepository->getById(intval($this->request->get('submission_id')));
 
     try {
-      $this->agreementService->confirmAgreementAndAddChargeTQueue($submission);
+      $this->agreementService->confirmAgreementAndAddChargeToQueue($submission);
       $this->messenger->addMessage($this->t('Subscription has been done successfully: '. $submission->id()));
 
     } catch (\Throwable $e) {
