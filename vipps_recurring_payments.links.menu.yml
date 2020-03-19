@@ -19,13 +19,6 @@ entity.vipps_agreements.collection:
   parent: system.vipps
   weight: 100
 
-vipps_agreements.admin.structure.settings:
-  title: 'Vipps agreements settings'
-  description: 'Configure Vipps agreements entities'
-  route_name: vipps_agreements.settings
-  parent: system.vipps
-  weight: 90
-
 # Monthly charges menu items definition
 entity.monthly_charges.collection:
   title: 'Monthly charges list'
@@ -33,10 +26,3 @@ entity.monthly_charges.collection:
   description: 'List Monthly charges entities'
   parent: system.vipps
   weight: 101
-
-monthly_charges.admin.structure.settings:
-  title: 'Monthly charges settings'
-  description: 'Configure Monthly charges entities'
-  route_name: monthly_charges.settings
-  parent: system.vipps
-  weight: 91

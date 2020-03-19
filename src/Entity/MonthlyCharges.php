@@ -51,15 +51,15 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "description" = "description"
  *   },
  *   links = {
- *     "canonical" = "/admin/structure/vipps/monthly_charges/{monthly_charges}",
- *     "add-form" = "/admin/structure/vipps/monthly_charges/add",
- *     "edit-form" = "/admin/structure/vipps/monthly_charges/{monthly_charges}/edit",
- *     "delete-form" = "/admin/structure/vipps/monthly_charges/{monthly_charges}/delete",
- *     "version-history" = "/admin/structure/vipps/monthly_charges/{monthly_charges}/revisions",
- *     "revision" = "/admin/structure/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/view",
- *     "revision_revert" = "/admin/structure/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/revert",
- *     "revision_delete" = "/admin/structure/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/delete",
- *     "collection" = "/admin/structure/vipps/monthly_charges",
+ *     "canonical" = "/admin/vipps/monthly_charges/{monthly_charges}",
+ *     "add-form" = "/admin/vipps/monthly_charges/add",
+ *     "edit-form" = "/admin/vipps/monthly_charges/{monthly_charges}/edit",
+ *     "delete-form" = "/admin/vipps/monthly_charges/{monthly_charges}/delete",
+ *     "version-history" = "/admin/vipps/monthly_charges/{monthly_charges}/revisions",
+ *     "revision" = "/admin/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/view",
+ *     "revision_revert" = "/admin/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/revert",
+ *     "revision_delete" = "/admin/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/delete",
+ *     "collection" = "/admin/vipps/monthly_charges",
  *   },
  *   field_ui_base_route = "monthly_charges.settings"
  * )
