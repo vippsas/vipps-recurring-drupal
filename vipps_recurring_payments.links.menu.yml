@@ -19,10 +19,10 @@ entity.vipps_agreements.collection:
   parent: system.vipps
   weight: 100
 
-# Monthly charges menu items definition
-entity.monthly_charges.collection:
-  title: 'Monthly charges list'
-  route_name: entity.monthly_charges.collection
-  description: 'List Monthly charges entities'
+# Periodic charges menu items definition
+entity.periodic_charges.collection:
+  title: 'Periodic charges list'
+  route_name: entity.periodic_charges.collection
+  description: 'List Periodic charges entities'
   parent: system.vipps
   weight: 101

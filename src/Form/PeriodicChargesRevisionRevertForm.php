@@ -5,25 +5,25 @@ namespace Drupal\vipps_recurring_payments\Form;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\vipps_recurring_payments\Entity\MonthlyChargesInterface;
+use Drupal\vipps_recurring_payments\Entity\PeriodicChargesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a form for reverting a Monthly charges revision.
+ * Provides a form for reverting a Periodic charges revision.
  *
  * @ingroup vipps_recurring_payments
  */
-class MonthlyChargesRevisionRevertForm extends ConfirmFormBase {
+class PeriodicChargesRevisionRevertForm extends ConfirmFormBase {
 
   /**
-   * The Monthly charges revision.
+   * The Periodic charges revision.
    *
-   * @var \Drupal\vipps_recurring_payments\Entity\MonthlyChargesInterface
+   * @var \Drupal\vipps_recurring_payments\Entity\PeriodicChargesInterface
    */
   protected $revision;
 
   /**
-   * The Monthly charges storage.
+   * The Periodic charges storage.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
@@ -41,7 +41,7 @@ class MonthlyChargesRevisionRevertForm extends ConfirmFormBase {
    */
   public static function create(ContainerInterface $container) {
     $instance = parent::create($container);
-    $instance->monthlyChargesStorage = $container->get('entity_type.manager')->getStorage('monthly_charges');
+    $instance->monthlyChargesStorage = $container->get('entity_type.manager')->getStorage('periodic_charges');
     $instance->dateFormatter = $container->get('date.formatter');
     return $instance;
   }
@@ -50,7 +50,7 @@ class MonthlyChargesRevisionRevertForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'monthly_charges_revision_revert_confirm';
+    return 'periodic_charges_revision_revert_confirm';
   }
 
   /**
@@ -66,7 +66,7 @@ class MonthlyChargesRevisionRevertForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('entity.monthly_charges.version_history', ['monthly_charges' => $this->revision->id()]);
+    return new Url('entity.periodic_charges.version_history', ['periodic_charges' => $this->revision->id()]);
   }
 
   /**
@@ -86,8 +86,8 @@ class MonthlyChargesRevisionRevertForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $monthly_charges_revision = NULL) {
-    $this->revision = $this->MonthlyChargesStorage->loadRevision($monthly_charges_revision);
+  public function buildForm(array $form, FormStateInterface $form_state, $periodic_charges_revision = NULL) {
+    $this->revision = $this->PeriodicChargesStorage->loadRevision($periodic_charges_revision);
     $form = parent::buildForm($form, $form_state);
 
     return $form;
@@ -107,26 +107,26 @@ class MonthlyChargesRevisionRevertForm extends ConfirmFormBase {
     ]);
     $this->revision->save();
 
-    $this->logger('content')->notice('Monthly charges: reverted %title revision %revision.', ['%title' => $this->revision->label(), '%revision' => $this->revision->getRevisionId()]);
-    $this->messenger()->addMessage(t('Monthly charges %title has been reverted to the revision from %revision-date.', ['%title' => $this->revision->label(), '%revision-date' => $this->dateFormatter->format($original_revision_timestamp)]));
+    $this->logger('content')->notice('Periodic charges: reverted %title revision %revision.', ['%title' => $this->revision->label(), '%revision' => $this->revision->getRevisionId()]);
+    $this->messenger()->addMessage(t('Periodic charges %title has been reverted to the revision from %revision-date.', ['%title' => $this->revision->label(), '%revision-date' => $this->dateFormatter->format($original_revision_timestamp)]));
     $form_state->setRedirect(
-      'entity.monthly_charges.version_history',
-      ['monthly_charges' => $this->revision->id()]
+      'entity.periodic_charges.version_history',
+      ['periodic_charges' => $this->revision->id()]
     );
   }
 
   /**
    * Prepares a revision to be reverted.
    *
-   * @param \Drupal\vipps_recurring_payments\Entity\MonthlyChargesInterface $revision
+   * @param \Drupal\vipps_recurring_payments\Entity\PeriodicChargesInterface $revision
    *   The revision to be reverted.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    *
-   * @return \Drupal\vipps_recurring_payments\Entity\MonthlyChargesInterface
+   * @return \Drupal\vipps_recurring_payments\Entity\PeriodicChargesInterface
    *   The prepared revision ready to be stored.
    */
-  protected function prepareRevertedRevision(MonthlyChargesInterface $revision, FormStateInterface $form_state) {
+  protected function prepareRevertedRevision(PeriodicChargesInterface $revision, FormStateInterface $form_state) {
     $revision->setNewRevision();
     $revision->isDefaultRevision(TRUE);
     $revision->setRevisionCreationTime(REQUEST_TIME);

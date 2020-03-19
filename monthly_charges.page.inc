@@ -2,26 +2,26 @@
 
 /**
  * @file
- * Contains monthly_charges.page.inc.
+ * Contains periodic_charges.page.inc.
  *
- * Page callback for Monthly charges entities.
+ * Page callback for Periodic charges entities.
  */
 
 use Drupal\Core\Render\Element;
 
 /**
- * Prepares variables for Monthly charges templates.
+ * Prepares variables for Periodic charges templates.
  *
- * Default template: monthly_charges.html.twig.
+ * Default template: periodic_charges.html.twig.
  *
  * @param array $variables
  *   An associative array containing:
  *   - elements: An associative array containing the user information and any
  *   - attributes: HTML attributes for the containing element.
  */
-function template_preprocess_monthly_charges(array &$variables) {
-  // Fetch MonthlyCharges Entity Object.
-  $monthly_charges = $variables['elements']['#monthly_charges'];
+function template_preprocess_periodic_charges(array &$variables) {
+  // Fetch PeriodicCharges Entity Object.
+  $periodic_charges = $variables['elements']['#periodic_charges'];
 
   // Helpful $content variable for templates.
   foreach (Element::children($variables['elements']) as $key) {

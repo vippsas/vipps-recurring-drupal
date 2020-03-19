@@ -11,35 +11,35 @@ use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 
 /**
- * Defines the Monthly charges entity.
+ * Defines the Periodic charges entity.
  *
  * @ingroup vipps_recurring_payments
  *
  * @ContentEntityType(
- *   id = "monthly_charges",
- *   label = @Translation("Monthly charges"),
+ *   id = "periodic_charges",
+ *   label = @Translation("Periodic charges"),
  *   handlers = {
- *     "storage" = "Drupal\vipps_recurring_payments\MonthlyChargesStorage",
+ *     "storage" = "Drupal\vipps_recurring_payments\PeriodicChargesStorage",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "list_builder" = "Drupal\vipps_recurring_payments\MonthlyChargesListBuilder",
- *     "views_data" = "Drupal\vipps_recurring_payments\Entity\MonthlyChargesViewsData",
+ *     "list_builder" = "Drupal\vipps_recurring_payments\PeriodicChargesListBuilder",
+ *     "views_data" = "Drupal\vipps_recurring_payments\Entity\PeriodicChargesViewsData",
  *
  *     "form" = {
- *       "default" = "Drupal\vipps_recurring_payments\Form\MonthlyChargesForm",
- *       "add" = "Drupal\vipps_recurring_payments\Form\MonthlyChargesForm",
- *       "edit" = "Drupal\vipps_recurring_payments\Form\MonthlyChargesForm",
- *       "delete" = "Drupal\vipps_recurring_payments\Form\MonthlyChargesDeleteForm",
+ *       "default" = "Drupal\vipps_recurring_payments\Form\PeriodicChargesForm",
+ *       "add" = "Drupal\vipps_recurring_payments\Form\PeriodicChargesForm",
+ *       "edit" = "Drupal\vipps_recurring_payments\Form\PeriodicChargesForm",
+ *       "delete" = "Drupal\vipps_recurring_payments\Form\PeriodicChargesDeleteForm",
  *     },
  *     "route_provider" = {
- *       "html" = "Drupal\vipps_recurring_payments\MonthlyChargesHtmlRouteProvider",
+ *       "html" = "Drupal\vipps_recurring_payments\PeriodicChargesHtmlRouteProvider",
  *     },
- *     "access" = "Drupal\vipps_recurring_payments\MonthlyChargesAccessControlHandler",
+ *     "access" = "Drupal\vipps_recurring_payments\PeriodicChargesAccessControlHandler",
  *   },
- *   base_table = "monthly_charges",
- *   revision_table = "monthly_charges_revision",
- *   revision_data_table = "monthly_charges_field_revision",
+ *   base_table = "periodic_charges",
+ *   revision_table = "periodic_charges_revision",
+ *   revision_data_table = "periodic_charges_field_revision",
  *   translatable = FALSE,
- *   admin_permission = "administer monthly charges entities",
+ *   admin_permission = "administer periodic charges entities",
  *   entity_keys = {
  *     "id" = "id",
  *     "revision" = "vid",
@@ -51,20 +51,20 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "description" = "description"
  *   },
  *   links = {
- *     "canonical" = "/admin/vipps/monthly_charges/{monthly_charges}",
- *     "add-form" = "/admin/vipps/monthly_charges/add",
- *     "edit-form" = "/admin/vipps/monthly_charges/{monthly_charges}/edit",
- *     "delete-form" = "/admin/vipps/monthly_charges/{monthly_charges}/delete",
- *     "version-history" = "/admin/vipps/monthly_charges/{monthly_charges}/revisions",
- *     "revision" = "/admin/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/view",
- *     "revision_revert" = "/admin/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/revert",
- *     "revision_delete" = "/admin/vipps/monthly_charges/{monthly_charges}/revisions/{monthly_charges_revision}/delete",
- *     "collection" = "/admin/vipps/monthly_charges",
+ *     "canonical" = "/admin/vipps/periodic_charges/{periodic_charges}",
+ *     "add-form" = "/admin/vipps/periodic_charges/add",
+ *     "edit-form" = "/admin/vipps/periodic_charges/{periodic_charges}/edit",
+ *     "delete-form" = "/admin/vipps/periodic_charges/{periodic_charges}/delete",
+ *     "version-history" = "/admin/vipps/periodic_charges/{periodic_charges}/revisions",
+ *     "revision" = "/admin/vipps/periodic_charges/{periodic_charges}/revisions/{periodic_charges_revision}/view",
+ *     "revision_revert" = "/admin/vipps/periodic_charges/{periodic_charges}/revisions/{periodic_charges_revision}/revert",
+ *     "revision_delete" = "/admin/vipps/periodic_charges/{periodic_charges}/revisions/{periodic_charges_revision}/delete",
+ *     "collection" = "/admin/vipps/periodic_charges",
  *   },
- *   field_ui_base_route = "monthly_charges.settings"
+ *   field_ui_base_route = "periodic_charges.settings"
  * )
  */
-class MonthlyCharges extends EditorialContentEntityBase implements MonthlyChargesInterface {
+class PeriodicCharges extends EditorialContentEntityBase implements PeriodicChargesInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;
@@ -211,7 +211,7 @@ class MonthlyCharges extends EditorialContentEntityBase implements MonthlyCharge
     // Charge ID
     $fields['charge_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Charge ID'))
-      ->setDescription(t('The name of the Monthly charges entity.'))
+      ->setDescription(t('The name of the Periodic charges entity.'))
       ->setRevisionable(TRUE)
       ->setSettings([
         'max_length' => 50,
@@ -298,7 +298,7 @@ class MonthlyCharges extends EditorialContentEntityBase implements MonthlyCharge
       ->setDisplayConfigurable('view', TRUE)
       ->setRequired(TRUE);
 
-    $fields['status']->setDescription(t('A boolean indicating whether the Monthly charges is published.'))
+    $fields['status']->setDescription(t('A boolean indicating whether the Periodic charges is published.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
         'weight' => -3,

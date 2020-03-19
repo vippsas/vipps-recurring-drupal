@@ -7,12 +7,12 @@ use Drupal\Core\Entity\Routing\AdminHtmlRouteProvider;
 use Symfony\Component\Routing\Route;
 
 /**
- * Provides routes for Monthly charges entities.
+ * Provides routes for Periodic charges entities.
  *
  * @see \Drupal\Core\Entity\Routing\AdminHtmlRouteProvider
  * @see \Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider
  */
-class MonthlyChargesHtmlRouteProvider extends AdminHtmlRouteProvider {
+class PeriodicChargesHtmlRouteProvider extends AdminHtmlRouteProvider {
 
   /**
    * {@inheritdoc}
@@ -60,9 +60,9 @@ class MonthlyChargesHtmlRouteProvider extends AdminHtmlRouteProvider {
       $route
         ->setDefaults([
           '_title' => "{$entity_type->getLabel()} revisions",
-          '_controller' => '\Drupal\vipps_recurring_payments\Controller\MonthlyChargesController::revisionOverview',
+          '_controller' => '\Drupal\vipps_recurring_payments\Controller\PeriodicChargesController::revisionOverview',
         ])
-        ->setRequirement('_permission', 'view all monthly charges revisions')
+        ->setRequirement('_permission', 'view all periodic charges revisions')
         ->setOption('_admin_route', TRUE);
 
       return $route;
@@ -83,10 +83,10 @@ class MonthlyChargesHtmlRouteProvider extends AdminHtmlRouteProvider {
       $route = new Route($entity_type->getLinkTemplate('revision'));
       $route
         ->setDefaults([
-          '_controller' => '\Drupal\vipps_recurring_payments\Controller\MonthlyChargesController::revisionShow',
-          '_title_callback' => '\Drupal\vipps_recurring_payments\Controller\MonthlyChargesController::revisionPageTitle',
+          '_controller' => '\Drupal\vipps_recurring_payments\Controller\PeriodicChargesController::revisionShow',
+          '_title_callback' => '\Drupal\vipps_recurring_payments\Controller\PeriodicChargesController::revisionPageTitle',
         ])
-        ->setRequirement('_permission', 'view all monthly charges revisions')
+        ->setRequirement('_permission', 'view all periodic charges revisions')
         ->setOption('_admin_route', TRUE);
 
       return $route;
@@ -107,10 +107,10 @@ class MonthlyChargesHtmlRouteProvider extends AdminHtmlRouteProvider {
       $route = new Route($entity_type->getLinkTemplate('revision_revert'));
       $route
         ->setDefaults([
-          '_form' => '\Drupal\vipps_recurring_payments\Form\MonthlyChargesRevisionRevertForm',
+          '_form' => '\Drupal\vipps_recurring_payments\Form\PeriodicChargesRevisionRevertForm',
           '_title' => 'Revert to earlier revision',
         ])
-        ->setRequirement('_permission', 'revert all monthly charges revisions')
+        ->setRequirement('_permission', 'revert all periodic charges revisions')
         ->setOption('_admin_route', TRUE);
 
       return $route;
@@ -131,10 +131,10 @@ class MonthlyChargesHtmlRouteProvider extends AdminHtmlRouteProvider {
       $route = new Route($entity_type->getLinkTemplate('revision_delete'));
       $route
         ->setDefaults([
-          '_form' => '\Drupal\vipps_recurring_payments\Form\MonthlyChargesRevisionDeleteForm',
+          '_form' => '\Drupal\vipps_recurring_payments\Form\PeriodicChargesRevisionDeleteForm',
           '_title' => 'Delete earlier revision',
         ])
-        ->setRequirement('_permission', 'delete all monthly charges revisions')
+        ->setRequirement('_permission', 'delete all periodic charges revisions')
         ->setOption('_admin_route', TRUE);
 
       return $route;
@@ -155,7 +155,7 @@ class MonthlyChargesHtmlRouteProvider extends AdminHtmlRouteProvider {
       $route = new Route("/admin/structure/{$entity_type->id()}/settings");
       $route
         ->setDefaults([
-          '_form' => 'Drupal\vipps_recurring_payments\Form\MonthlyChargesSettingsForm',
+          '_form' => 'Drupal\vipps_recurring_payments\Form\PeriodicChargesSettingsForm',
           '_title' => "{$entity_type->getLabel()} settings",
         ])
         ->setRequirement('_permission', $entity_type->getAdminPermission())

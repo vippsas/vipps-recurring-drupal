@@ -3,8 +3,8 @@
 #  title: 'Add Vipps agreements'
 #  appears_on:
 #    - entity.vipps_agreements.collection
-#entity.monthly_charges.add_form:
-#  route_name: entity.monthly_charges.add_form
-#  title: 'Add Monthly charges'
+#entity.periodic_charges.add_form:
+#  route_name: entity.periodic_charges.add_form
+#  title: 'Add Periodic charges'
 #  appears_on:
-#    - entity.monthly_charges.collection
+#    - entity.periodic_charges.collection
