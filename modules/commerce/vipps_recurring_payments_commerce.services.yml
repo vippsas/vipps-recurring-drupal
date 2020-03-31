@@ -1,0 +1,38 @@
+services:
+  vipps_recurring_payments_commerce.manager:
+    class: Drupal\vipps_recurring_payments_commerce\VippsManager
+    arguments: ['@vipps_recurring_payments:http_client']
+
+  vipps_recurring_payments_commerce:commerce_repository:
+    class: Drupal\vipps_recurring_payments_commerce\Repository\CommerceRepository
+    arguments: [
+      '@entity_type.manager',
+      '@vipps_recurring_payments_commerce:cacheManager',
+      '@commerce_price.currency_repository',
+      '@commerce_product.attribute_field_manager']
+
+  vipps_recurring_payments_commerce:transactionManager:
+    class: Drupal\vipps_recurring_payments_commerce\Service\TransactionManager
+    arguments: ['@database', '@logger.factory']
+
+  vipps_recurring_payments_commerce:queue_manager:
+    class: Drupal\vipps_recurring_payments_commerce\Service\QueueManager
+    arguments: [
+      '@vipps_recurring_payments:delay_manager',
+      '@logger.factory']
+
+  vipps_recurring_payments_commerce:entities_factory:
+    class: Drupal\vipps_recurring_payments_commerce\Factory\CommerceEntitiesFactory
+    arguments: [
+      '@current_user',
+      '@request_stack',
+      '@vipps_recurring_payments_commerce:commerce_repository']
+
+  vipps_recurring_payments_commerce:cacheManager:
+    class: Drupal\vipps_recurring_payments_commerce\Service\CacheManager
+    arguments: ['@cache.entity']
+
+  vipps_recurring_payments_commerce.chain_order_id_resolver:
+    class: Drupal\vipps_recurring_payments_commerce\Resolver\ChainOrderIdResolver
+#    tags:
+#      - { name: service_collector, call: addResolver, tag: vipps_recurring_payments_commerce.order_id_resolver }

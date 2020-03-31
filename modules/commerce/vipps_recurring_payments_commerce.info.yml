@@ -1,0 +1,10 @@
+name: 'Vipps Recurring Payments Commerce'
+type: module
+description: 'Use commerce with Vipps Recurring Payments'
+core: 8.x
+package: 'Vipps'
+dependencies:
+  - vipps_recurring_payments
+  - commerce
+  - commerce_checkout
+  - commerce_payment
