@@ -6,15 +6,15 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Url;
-use Drupal\vipps_recurring_payments\Entity\MonthlyChargesInterface;
+use Drupal\vipps_recurring_payments\Entity\PeriodicChargesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class MonthlyChargesController.
+ * Class PeriodicChargesController.
  *
- *  Returns responses for Monthly charges routes.
+ *  Returns responses for Periodic charges routes.
  */
-class MonthlyChargesController extends ControllerBase implements ContainerInjectionInterface {
+class PeriodicChargesController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
    * The date formatter.
@@ -41,74 +41,74 @@ class MonthlyChargesController extends ControllerBase implements ContainerInject
   }
 
   /**
-   * Displays a Monthly charges revision.
+   * Displays a Periodic charges revision.
    *
-   * @param int $monthly_charges_revision
-   *   The Monthly charges revision ID.
+   * @param int $periodic_charges_revision
+   *   The Periodic charges revision ID.
    *
    * @return array
    *   An array suitable for drupal_render().
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function revisionShow($monthly_charges_revision) {
-    $monthly_charges = $this->entityTypeManager()->getStorage('monthly_charges')
-      ->loadRevision($monthly_charges_revision);
-    $view_builder = $this->entityTypeManager()->getViewBuilder('monthly_charges');
+  public function revisionShow($periodic_charges_revision) {
+    $periodic_charges = $this->entityTypeManager()->getStorage('periodic_charges')
+      ->loadRevision($periodic_charges_revision);
+    $view_builder = $this->entityTypeManager()->getViewBuilder('periodic_charges');
 
-    return $view_builder->view($monthly_charges);
+    return $view_builder->view($periodic_charges);
   }
 
   /**
-   * Page title callback for a Monthly charges revision.
+   * Page title callback for a Periodic charges revision.
    *
-   * @param int $monthly_charges_revision
-   *   The Monthly charges revision ID.
+   * @param int $periodic_charges_revision
+   *   The Periodic charges revision ID.
    *
    * @return string
    *   The page title.
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function revisionPageTitle($monthly_charges_revision) {
-    $monthly_charges = $this->entityTypeManager()->getStorage('monthly_charges')
-      ->loadRevision($monthly_charges_revision);
+  public function revisionPageTitle($periodic_charges_revision) {
+    $periodic_charges = $this->entityTypeManager()->getStorage('periodic_charges')
+      ->loadRevision($periodic_charges_revision);
     return $this->t('Revision of %title from %date', [
-      '%title' => $monthly_charges->label(),
-      '%date' => $this->dateFormatter->format($monthly_charges->getRevisionCreationTime()),
+      '%title' => $periodic_charges->label(),
+      '%date' => $this->dateFormatter->format($periodic_charges->getRevisionCreationTime()),
     ]);
   }
 
   /**
-   * Generates an overview table of older revisions of a Monthly charges.
+   * Generates an overview table of older revisions of a Periodic charges.
    *
-   * @param \Drupal\vipps_recurring_payments\Entity\MonthlyChargesInterface $monthly_charges
-   *   A Monthly charges object.
+   * @param \Drupal\vipps_recurring_payments\Entity\PeriodicChargesInterface $periodic_charges
+   *   A Periodic charges object.
    *
    * @return array
    *   An array as expected by drupal_render().
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function revisionOverview(MonthlyChargesInterface $monthly_charges) {
+  public function revisionOverview(PeriodicChargesInterface $periodic_charges) {
     $account = $this->currentUser();
-    $monthly_charges_storage = $this->entityTypeManager()->getStorage('monthly_charges');
+    $periodic_charges_storage = $this->entityTypeManager()->getStorage('periodic_charges');
 
-    $build['#title'] = $this->t('Revisions for %title', ['%title' => $monthly_charges->label()]);
+    $build['#title'] = $this->t('Revisions for %title', ['%title' => $periodic_charges->label()]);
 
     $header = [$this->t('Revision'), $this->t('Operations')];
-    $revert_permission = (($account->hasPermission("revert all monthly charges revisions") || $account->hasPermission('administer monthly charges entities')));
-    $delete_permission = (($account->hasPermission("delete all monthly charges revisions") || $account->hasPermission('administer monthly charges entities')));
+    $revert_permission = (($account->hasPermission("revert all periodic charges revisions") || $account->hasPermission('administer periodic charges entities')));
+    $delete_permission = (($account->hasPermission("delete all periodic charges revisions") || $account->hasPermission('administer periodic charges entities')));
 
     $rows = [];
 
-    $vids = $monthly_charges_storage->revisionIds($monthly_charges);
+    $vids = $periodic_charges_storage->revisionIds($periodic_charges);
 
     $latest_revision = TRUE;
 
     foreach (array_reverse($vids) as $vid) {
-      /** @var \Drupal\vipps_recurring_payments\MonthlyChargesInterface $revision */
-      $revision = $monthly_charges_storage->loadRevision($vid);
+      /** @var \Drupal\vipps_recurring_payments\PeriodicChargesInterface $revision */
+      $revision = $periodic_charges_storage->loadRevision($vid);
         $username = [
           '#theme' => 'username',
           '#account' => $revision->getRevisionUser(),
@@ -116,14 +116,14 @@ class MonthlyChargesController extends ControllerBase implements ContainerInject
 
         // Use revision link to link to revisions that are not active.
         $date = $this->dateFormatter->format($revision->getRevisionCreationTime(), 'short');
-        if ($vid != $monthly_charges->getRevisionId()) {
-          $link = $this->l($date, new Url('entity.monthly_charges.revision', [
-            'monthly_charges' => $monthly_charges->id(),
-            'monthly_charges_revision' => $vid,
+        if ($vid != $periodic_charges->getRevisionId()) {
+          $link = $this->l($date, new Url('entity.periodic_charges.revision', [
+            'periodic_charges' => $periodic_charges->id(),
+            'periodic_charges_revision' => $vid,
           ]));
         }
         else {
-          $link = $monthly_charges->link($date);
+          $link = $periodic_charges->link($date);
         }
 
         $row = [];
@@ -161,9 +161,9 @@ class MonthlyChargesController extends ControllerBase implements ContainerInject
           if ($revert_permission) {
             $links['revert'] = [
               'title' => $this->t('Revert'),
-              'url' => Url::fromRoute('entity.monthly_charges.revision_revert', [
-                'monthly_charges' => $monthly_charges->id(),
-                'monthly_charges_revision' => $vid,
+              'url' => Url::fromRoute('entity.periodic_charges.revision_revert', [
+                'periodic_charges' => $periodic_charges->id(),
+                'periodic_charges_revision' => $vid,
               ]),
             ];
           }
@@ -171,9 +171,9 @@ class MonthlyChargesController extends ControllerBase implements ContainerInject
           if ($delete_permission) {
             $links['delete'] = [
               'title' => $this->t('Delete'),
-              'url' => Url::fromRoute('entity.monthly_charges.revision_delete', [
-                'monthly_charges' => $monthly_charges->id(),
-                'monthly_charges_revision' => $vid,
+              'url' => Url::fromRoute('entity.periodic_charges.revision_delete', [
+                'periodic_charges' => $periodic_charges->id(),
+                'periodic_charges_revision' => $vid,
               ]),
             ];
           }
@@ -189,7 +189,7 @@ class MonthlyChargesController extends ControllerBase implements ContainerInject
         $rows[] = $row;
     }
 
-    $build['monthly_charges_revisions_table'] = [
+    $build['periodic_charges_revisions_table'] = [
       '#theme' => 'table',
       '#rows' => $rows,
       '#header' => $header,

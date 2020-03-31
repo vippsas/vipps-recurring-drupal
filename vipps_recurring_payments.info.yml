@@ -3,6 +3,7 @@ type: module
 description: 'Base module for Vipps Recurring Payments'
 core: 8.x
 package: 'Vipps'
+configure: vipps_recurring_payments.settings
 dependencies:
   - advancedqueue
   #- basic_auth TODO fix bug with basic auth on devz

@@ -7,7 +7,7 @@ namespace Drupal\vipps_recurring_payments_webform\Service;
 use Drupal\advancedqueue\Job;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\vipps_recurring_payments\Entity\MonthlyCharges;
+use Drupal\vipps_recurring_payments\Entity\PeriodicCharges;
 use Drupal\vipps_recurring_payments\Entity\VippsAgreements;
 use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
 use Drupal\vipps_recurring_payments\Service\DelayManager;
@@ -96,7 +96,7 @@ class AgreementService
     $agreementNodeId = $agreementNode->id();
 
     /**
-     * Store first charge as monthly_charges entity
+     * Store first charge as periodic_charges entity
      */
     $charges = $this->httpClient->getCharges(
       $this->httpClient->auth(),
@@ -104,9 +104,9 @@ class AgreementService
     );
 
     if (isset($charges)) {
-      $chargeNode = new MonthlyCharges([
-        'type' => 'monthly_charges',
-      ], 'monthly_charges');
+      $chargeNode = new PeriodicCharges([
+        'type' => 'periodic_charges',
+      ], 'periodic_charges');
       $chargeNode->set('status', 1);
       $chargeNode->setChargeId($charges[0]->id);
       $chargeNode->setPrice($charges[0]->amount);

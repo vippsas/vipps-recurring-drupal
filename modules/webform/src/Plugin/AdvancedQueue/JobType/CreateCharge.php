@@ -11,7 +11,7 @@ use Drupal\advancedqueue\Entity\Queue;
 use Drupal\advancedqueue\Plugin\AdvancedQueue\JobType\JobTypeBase;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\vipps_recurring_payments\Entity\MonthlyCharges;
+use Drupal\vipps_recurring_payments\Entity\PeriodicCharges;
 use Drupal\vipps_recurring_payments\Entity\VippsAgreements;
 use Drupal\vipps_recurring_payments\Repository\ProductSubscriptionRepositoryInterface;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
@@ -76,11 +76,11 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
 
       // Get charge
       $charge = $this->httpClient->getCharge($this->httpClient->auth(), $agreementId, $chargeId);
-      // Store charge in monthly_charges entity
+      // Store charge in periodic_charges entity
       if (isset($charge)) {
-        $chargeNode = new MonthlyCharges([
-          'type' => 'monthly_charges',
-        ], 'monthly_charges');
+        $chargeNode = new PeriodicCharges([
+          'type' => 'periodic_charges',
+        ], 'periodic_charges');
         $chargeNode->set('status', 1);
         $chargeNode->setChargeId($chargeId);
         $chargeNode->setPrice($charge->getAmount());

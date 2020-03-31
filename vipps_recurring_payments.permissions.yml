@@ -29,34 +29,34 @@ delete all vipps agreements revisions:
   title: 'Delete all revisions'
   description: 'Role requires permission to <em>view Vipps agreements revisions</em> and <em>delete rights</em> for vipps agreements entities in question or <em>administer vipps agreements entities</em>.'
 
-add monthly charges entities:
-  title: 'Create new Monthly charges entities'
+add periodic charges entities:
+  title: 'Create new Periodic charges entities'
 
-administer monthly charges entities:
-  title: 'Administer Monthly charges entities'
-  description: 'Allow to access the administration form to configure Monthly charges entities.'
+administer periodic charges entities:
+  title: 'Administer Periodic charges entities'
+  description: 'Allow to access the administration form to configure Periodic charges entities.'
   restrict access: true
 
-delete monthly charges entities:
-  title: 'Delete Monthly charges entities'
+delete periodic charges entities:
+  title: 'Delete Periodic charges entities'
 
-edit monthly charges entities:
-  title: 'Edit Monthly charges entities'
+edit periodic charges entities:
+  title: 'Edit Periodic charges entities'
 
-view published monthly charges entities:
-  title: 'View published Monthly charges entities'
+view published periodic charges entities:
+  title: 'View published Periodic charges entities'
 
-view unpublished monthly charges entities:
-  title: 'View unpublished Monthly charges entities'
+view unpublished periodic charges entities:
+  title: 'View unpublished Periodic charges entities'
 
-view all monthly charges revisions:
-  title: 'View all Monthly charges revisions'
+view all periodic charges revisions:
+  title: 'View all Periodic charges revisions'
 
-revert all monthly charges revisions:
-  title: 'Revert all Monthly charges revisions'
-  description: 'Role requires permission <em>view Monthly charges revisions</em> and <em>edit rights</em> for monthly charges entities in question or <em>administer monthly charges entities</em>.'
+revert all periodic charges revisions:
+  title: 'Revert all Periodic charges revisions'
+  description: 'Role requires permission <em>view Periodic charges revisions</em> and <em>edit rights</em> for periodic charges entities in question or <em>administer periodic charges entities</em>.'
 
-delete all monthly charges revisions:
+delete all periodic charges revisions:
   title: 'Delete all revisions'
-  description: 'Role requires permission to <em>view Monthly charges revisions</em> and <em>delete rights</em> for monthly charges entities in question or <em>administer monthly charges entities</em>.'
+  description: 'Role requires permission to <em>view Periodic charges revisions</em> and <em>delete rights</em> for periodic charges entities in question or <em>administer periodic charges entities</em>.'
 

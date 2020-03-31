@@ -8,37 +8,37 @@ use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
 
 /**
- * Provides an interface for defining Monthly charges entities.
+ * Provides an interface for defining Periodic charges entities.
  *
  * @ingroup vipps_recurring_payments
  */
-interface MonthlyChargesInterface extends ContentEntityInterface, RevisionLogInterface, EntityChangedInterface, EntityPublishedInterface {
+interface PeriodicChargesInterface extends ContentEntityInterface, RevisionLogInterface, EntityChangedInterface, EntityPublishedInterface {
 
   /**
    * Add get/set methods for your configuration properties here.
    */
 
   /**
-   * Gets the Monthly charges ID.
+   * Gets the Periodic charges ID.
    *
    * @return string
-   *   Name of the Monthly charges.
+   *   Name of the Periodic charges.
    */
   public function getChargeId();
 
   /**
-   * Sets the Monthly charges ID.
+   * Sets the Periodic charges ID.
    *
    * @param string $id
-   *   The Monthly charges ID.
+   *   The Periodic charges ID.
    *
-   * @return MonthlyChargesInterface
-   *   The called Monthly charges entity.
+   * @return PeriodicChargesInterface
+   *   The called Periodic charges entity.
    */
   public function setChargeId($id);
 
   /**
-   * Gets the Monthly charges price.
+   * Gets the Periodic charges price.
    *
    * @return string
    *   Name of the Monthly charge price.
@@ -46,18 +46,18 @@ interface MonthlyChargesInterface extends ContentEntityInterface, RevisionLogInt
   public function getPrice();
 
   /**
-   * Sets the Monthly charges price.
+   * Sets the Periodic charges price.
    *
    * @param string $price
-   *   The Monthly charges price.
+   *   The Periodic charges price.
    *
-   * @return MonthlyChargesInterface
-   *   The called Monthly charges entity.
+   * @return PeriodicChargesInterface
+   *   The called Periodic charges entity.
    */
   public function setPrice($price);
 
   /**
-   * Gets the Monthly charges price.
+   * Gets the Periodic charges price.
    *
    * @return string
    *   Name of the Monthly charge parent ID which is agreement.
@@ -65,18 +65,18 @@ interface MonthlyChargesInterface extends ContentEntityInterface, RevisionLogInt
   public function getParentId();
 
   /**
-   * Sets the Monthly charges parent.
+   * Sets the Periodic charges parent.
    *
    * @param string $parent
-   *   The Monthly charges parent ID.
+   *   The Periodic charges parent ID.
    *
-   * @return MonthlyChargesInterface
-   *   The called Monthly charges entity.
+   * @return PeriodicChargesInterface
+   *   The called Periodic charges entity.
    */
   public function setParentId($parent);
 
   /**
-   * Gets the Monthly charges description.
+   * Gets the Periodic charges description.
    *
    * @return string
    *   Name of the Monthly charge parent ID which is agreement.
@@ -84,13 +84,13 @@ interface MonthlyChargesInterface extends ContentEntityInterface, RevisionLogInt
   public function getDescription();
 
   /**
-   * Sets the Monthly charges description.
+   * Sets the Periodic charges description.
    *
    * @param string $description
-   *   The Monthly charges description.
+   *   The Periodic charges description.
    *
-   * @return MonthlyChargesInterface
-   *   The called Monthly charges entity.
+   * @return PeriodicChargesInterface
+   *   The called Periodic charges entity.
    */
   public function setDescription($description);
 
@@ -123,26 +123,26 @@ interface MonthlyChargesInterface extends ContentEntityInterface, RevisionLogInt
   public function setStatus($status);
 
   /**
-   * Gets the Monthly charges creation timestamp.
+   * Gets the Periodic charges creation timestamp.
    *
    * @return int
-   *   Creation timestamp of the Monthly charges.
+   *   Creation timestamp of the Periodic charges.
    */
   public function getCreatedTime();
 
   /**
-   * Sets the Monthly charges creation timestamp.
+   * Sets the Periodic charges creation timestamp.
    *
    * @param int $timestamp
-   *   The Monthly charges creation timestamp.
+   *   The Periodic charges creation timestamp.
    *
-   * @return MonthlyChargesInterface
-   *   The called Monthly charges entity.
+   * @return PeriodicChargesInterface
+   *   The called Periodic charges entity.
    */
   public function setCreatedTime($timestamp);
 
   /**
-   * Gets the Monthly charges revision creation timestamp.
+   * Gets the Periodic charges revision creation timestamp.
    *
    * @return int
    *   The UNIX timestamp of when this revision was created.
@@ -150,18 +150,18 @@ interface MonthlyChargesInterface extends ContentEntityInterface, RevisionLogInt
   public function getRevisionCreationTime();
 
   /**
-   * Sets the Monthly charges revision creation timestamp.
+   * Sets the Periodic charges revision creation timestamp.
    *
    * @param int $timestamp
    *   The UNIX timestamp of when this revision was created.
    *
-   * @return MonthlyChargesInterface
-   *   The called Monthly charges entity.
+   * @return PeriodicChargesInterface
+   *   The called Periodic charges entity.
    */
   public function setRevisionCreationTime($timestamp);
 
   /**
-   * Gets the Monthly charges revision author.
+   * Gets the Periodic charges revision author.
    *
    * @return \Drupal\user\UserInterface
    *   The user entity for the revision author.
@@ -169,13 +169,13 @@ interface MonthlyChargesInterface extends ContentEntityInterface, RevisionLogInt
   public function getRevisionUser();
 
   /**
-   * Sets the Monthly charges revision author.
+   * Sets the Periodic charges revision author.
    *
    * @param int $uid
    *   The user ID of the revision author.
    *
-   * @return MonthlyChargesInterface
-   *   The called Monthly charges entity.
+   * @return PeriodicChargesInterface
+   *   The called Periodic charges entity.
    */
   public function setRevisionUserId($uid);
 

@@ -7,11 +7,11 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form controller for Monthly charges edit forms.
+ * Form controller for Periodic charges edit forms.
  *
  * @ingroup vipps_recurring_payments
  */
-class MonthlyChargesForm extends ContentEntityForm {
+class PeriodicChargesForm extends ContentEntityForm {
 
   /**
    * The current user account.
@@ -34,7 +34,7 @@ class MonthlyChargesForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    /* @var \Drupal\vipps_recurring_payments\Entity\MonthlyCharges $entity */
+    /* @var \Drupal\vipps_recurring_payments\Entity\PeriodicCharges $entity */
     $form = parent::buildForm($form, $form_state);
 
     if (!$this->entity->isNew()) {
@@ -71,17 +71,17 @@ class MonthlyChargesForm extends ContentEntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        $this->messenger()->addMessage($this->t('Created the %label Monthly charges.', [
+        $this->messenger()->addMessage($this->t('Created the %label Periodic charges.', [
           '%label' => $entity->label(),
         ]));
         break;
 
       default:
-        $this->messenger()->addMessage($this->t('Saved the %label Monthly charges.', [
+        $this->messenger()->addMessage($this->t('Saved the %label Periodic charges.', [
           '%label' => $entity->label(),
         ]));
     }
-    $form_state->setRedirect('entity.monthly_charges.canonical', ['monthly_charges' => $entity->id()]);
+    $form_state->setRedirect('entity.periodic_charges.canonical', ['periodic_charges' => $entity->id()]);
   }
 
 }

@@ -5,9 +5,9 @@ namespace Drupal\vipps_recurring_payments\Entity;
 use Drupal\views\EntityViewsData;
 
 /**
- * Provides Views data for Monthly charges entities.
+ * Provides Views data for Periodic charges entities.
  */
-class MonthlyChargesViewsData extends EntityViewsData {
+class PeriodicChargesViewsData extends EntityViewsData {
 
   /**
    * {@inheritdoc}

@@ -1,5 +1,5 @@
 uuid: 9b1a2a42-9215-45ff-9f6c-7352ec5ed703
-langcode: en
+langcode: nb
 status: open
 dependencies:
   module:
@@ -14,22 +14,17 @@ id: vipps_recurring_demo
 title: 'Vipps recurring demo'
 description: ''
 category: ''
-elements: |
+elements:
   amount:
-    '#type': textfield
+    '#type': number
     '#title': Amount
     '#required': true
-    '#required_error': 'The field is required'
-    '#pattern': '[0-9]+'
-    '#pattern_error': 'Amount must be a whole number without decimals'
-    '#flex': '2'
   phone:
     '#type': tel
     '#title': Phone
     '#pattern': '[0-9]{8}'
     '#pattern_error': 'Please enter a valid phone number, 8 numbers'
     '#international_preferred_countries': {  }
-    '#flex': '2'
     '#required': true
   first_name:
     '#type': textfield
@@ -217,5 +212,9 @@ handlers:
     status: true
     conditions: {  }
     weight: 0
-    settings: {  }
+    settings:
+      charge_interval: monthly
+      initial_charge: true
+      agreement_title: Title
+      agreement_description: Desc
 variants: {  }
