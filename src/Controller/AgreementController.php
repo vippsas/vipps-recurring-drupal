@@ -35,6 +35,11 @@ class AgreementController extends ControllerBase
     $this->logger->get('vipps')->debug(json_encode($_POST, $_GET));
   }
 
+  public function confirmAgreement()
+  {
+    $this->logger->get('vipps')->debug(json_encode($_POST, $_GET));
+  }
+
   public function get(){
     try {
       $requestContent = \GuzzleHttp\json_decode($this->request->getContent());

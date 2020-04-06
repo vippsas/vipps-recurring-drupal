@@ -59,7 +59,7 @@ class VippsApiConfig {
   }
 
   public function getMerchantRedirectUrl(array $params = []):string {
-    $urlObject = Url::fromRoute('vipps_recurring_payments_webform.confirm_agreement', $params, ['absolute' => TRUE]);
+    $urlObject = Url::fromRoute('vipps_recurring_payments.confirm_agreement', $params, ['absolute' => TRUE]);
     return $urlObject->toString();
   }
 

@@ -1,8 +1,4 @@
 services:
-  vipps_recurring_payments_commerce.manager:
-    class: Drupal\vipps_recurring_payments_commerce\VippsManager
-    arguments: ['@vipps_recurring_payments:http_client']
-
   vipps_recurring_payments_commerce:commerce_repository:
     class: Drupal\vipps_recurring_payments_commerce\Repository\CommerceRepository
     arguments: [

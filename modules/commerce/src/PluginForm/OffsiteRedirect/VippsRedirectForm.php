@@ -85,7 +85,7 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
     $token = $this->httpClient->auth();
 
     // Create payment.
-    $payment->setRemoteId($settings['prefix'] . $this->chainOrderIdResolver->resolve());
+    //$payment->setRemoteId($settings['prefix'] . $this->chainOrderIdResolver->resolve());
 
     // Save order.
     $order = $payment->getOrder();
@@ -111,15 +111,9 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
       'true'
     );
     $product->setPrice($order->total_price->getValue()[0]['number']);
-var_dump($this->requestStorageFactory->buildDefaultDraftAgreement(
-  $product,
-  '',
-  ['submission_id' => 1]
-));
-die();
+
     try {
       /**
-       * @todo What is the "Submission_id"???
        * @todo change the intervals monthly
        */
       $draftAgreementResponse = $this->httpClient->draftAgreement(
@@ -127,7 +121,10 @@ die();
         $this->requestStorageFactory->buildDefaultDraftAgreement(
           $product,
           '',
-          ['submission_id' => 1]
+          [
+            'commerce_order' => $order->id(),
+            'step' => 'payment'
+          ]
         )
       );
       $url = $draftAgreementResponse->getVippsConfirmationUrl();
@@ -137,8 +134,10 @@ die();
     }
 
     // If the payment was successfully created at remote host.
+    $payment->setRemoteId($draftAgreementResponse->getAgreementId());
     $payment->save();
     if ($order_changed === TRUE) {
+      $order->setData('agreementId', $draftAgreementResponse->getAgreementId());
       $order->save();
     }
 

@@ -1,0 +1,11 @@
+vipps_recurring_payments.confirm_agreement:
+  path: '/checkout/{commerce_order}/{step}/return'
+  defaults:
+    _controller: '\Drupal\commerce_payment\Controller\PaymentCheckoutController::returnPage'
+  requirements:
+    _custom_access: '\Drupal\commerce_checkout\Controller\CheckoutController::checkAccess'
+    _module_dependencies: commerce_checkout
+  options:
+    parameters:
+      commerce_order:
+        type: entity:commerce_order

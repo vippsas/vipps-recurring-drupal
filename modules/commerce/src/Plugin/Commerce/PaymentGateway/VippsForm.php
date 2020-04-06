@@ -3,6 +3,7 @@
 namespace Drupal\vipps_recurring_payments_commerce\Plugin\Commerce\PaymentGateway;
 
 use Drupal\commerce_payment\Entity\PaymentInterface;
+use Drupal\commerce_payment\Exception\DeclineException;
 use Drupal\commerce_payment\Exception\InvalidRequestException;
 use Drupal\commerce_payment\Exception\PaymentGatewayException;
 use Drupal\commerce_payment\Exception\SoftDeclineException;
@@ -20,9 +21,12 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\vipps_recurring_payments\Form\SettingsForm;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
+use Drupal\vipps_recurring_payments\Service\VippsService;
+use http\Client\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\commerce_price\Price;
+use zaporylie\Vipps\Exceptions\VippsException;
 
 /**
  * Provides the Nets payment gateway.
@@ -78,6 +82,11 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
   protected $configFactory;
 
   /**
+   * @var VippsService
+   */
+  private $vippsService;
+
+  /**
    * NetsCheckout constructor.
    *
    * @param array $configuration
@@ -95,12 +104,14 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time.
    * @param VippsHttpClient $httpClient
-   * @param \Psr\Log\LoggerInterface $logger
+   * @param ConfigFactoryInterface $configFactory
+   * @param VippsService $vippsService
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, PaymentTypeManager $payment_type_manager, PaymentMethodTypeManager $payment_method_type_manager, TimeInterface $time, VippsHttpClient $httpClient, ConfigFactoryInterface $configFactory) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $payment_type_manager, $payment_method_type_manager, $time);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, PaymentTypeManager $payment_type_manager, PaymentMethodTypeManager $payment_method_type_manager, TimeInterface $time, VippsHttpClient $httpClient, ConfigFactoryInterface $configFactory, VippsService $vippsService) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $payment_type_manager, $payment_method_type_manager, $time, $vippsService);
     $this->httpClient = $httpClient;
     $this->configFactory = $configFactory;
+    $this->vippsService = $vippsService;
   }
 
   /**
@@ -116,7 +127,8 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
       $container->get('plugin.manager.commerce_payment_method_type'),
       $container->get('datetime.time'),
       $container->get('vipps_recurring_payments:http_client'),
-      $container->get('config.factory')
+      $container->get('config.factory'),
+      $container->get('vipps_recurring_payments:vipps_service')
     );
   }
 
@@ -281,178 +293,123 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    * @throws \Exception
    */
   public function onReturn(OrderInterface $order, Request $request) {
-    // Verify payment method
-    $payment_method = $order->get('field_payment_method')->value;
+    $agreementId = $order->getData('agreementId');
+    $payment_storage = $this->entityTypeManager->getStorage('commerce_payment');
+    $matching_payments = $payment_storage->loadByProperties(['remote_id' => $agreementId, 'order_id' => $order->id()]);
+    $message_variables = [
+      '%oid' => $order->id(),
+    ];
 
-    var_dump($request);
-    die();
-
-    $remote_id = $request->get('transactionId') ?? null;
-    $response_code = $request->get('responseCode') ?? $request->get('status');
-    $capture = $request->get('capture');
-
-    if($payment_method === 'avtale_giro_bank_id') {
-      $message_variables = [
-        '%oid' => $order->id(),
-        '%rc' => $response_code,
-      ];
-
-      if (empty($response_code)) {
-        throw new PaymentGatewayException(new FormattableMarkup('Return from Nets has wrong values for order: %oid and responseCode: %rc.', $message_variables));
-      }
-
-      if($response_code === 'cancel') {
-        $message_variables['reason'] = "Canceled";
-        $this->logger->error('There was a problem with payment for order %oid, reason: %reason', $message_variables);
-        throw new PaymentGatewayException('Error at payment gateway.');
-      } else if($response_code === 'error') {
-        $message_variables['reason'] = "Error";
-        $this->logger->error('There was a problem with payment for order %oid, reason: %reason', $message_variables);
-        throw new PaymentGatewayException('Error at payment gateway.');
-      }
-
-      // We cannot rely on data we receive from NETS as there is no authorization,
-      // checksum or hash. We will retrieve transaction status from NETS API.
-      //$payment_settings = $this->configuration;
-      //$nets_transaction = $this->nets->queryTransactionInvoice($payment_settings);
-
-    } else {
-      // @todo: Check transaction ID mismatch.
-      if ($this->tempStore->get('transaction_id') !== $remote_id) {
-        throw new PaymentGatewayException(new FormattableMarkup('Mismatch between transaction ID in user session %session and transaction ID returned by NETS %nets.', ['%session' => $this->tempStore->get('transaction_id'), '%nets' => $remote_id]));
-      }
-
-      $message_variables = [
-        '%oid' => $order->id(),
-        '%tid' => $remote_id,
-        '%rc' => $response_code,
-      ];
-
-      if (empty($remote_id) || empty($response_code)) {
-        throw new PaymentGatewayException(new FormattableMarkup('Return from Nets has wrong values for order: %oid, transactionId: %tid and responseCode: %rc.', $message_variables));
-      }
-
-      // We cannot rely on data we receive from NETS as there is no authorization,
-      // checksum or hash. We will retrieve transaction status from NETS API.
-      $payment_settings = $this->configuration;
-      $nets_transaction = $this->nets->queryTransaction($payment_settings, $remote_id);
-
-      if (isset($nets_transaction->ErrorLog)
-        && isset($nets_transaction->ErrorLog->PaymentError)
-        && isset($nets_transaction->ErrorLog->PaymentError->ResponseText)) {
-
-        $message_variables['%reason'] = $nets_transaction->ErrorLog->PaymentError->ResponseText;
-        $this->logger->error('There was a problem with payment for order %oid, reason: %reason', $message_variables);
-        throw new PaymentGatewayException('Error at payment gateway.');
-      }
+    if (count($matching_payments) !== 1) {
+      \Drupal::logger('vipps_recurring_commerce')->error(
+        t('Order %oid: More than one matching payment found', $message_variables)
+      );
+      throw new PaymentGatewayException('More than one matching payment found');
     }
 
-    $action = $capture === '1' ? 'SALE' : 'AUTH';
+    /** @var \Drupal\commerce_payment\Entity\PaymentInterface $matching_payment */
+    $matching_payment = reset($matching_payments);
 
-    /** @var PaymentInterface $payment */
-    $payment = $this->entityTypeManager->getStorage('commerce_payment')->create([
-      'state' => 'new',
-      'amount' => $order->getTotalPrice(),
-      'payment_gateway' => $this->entityId,
-      'order_id' => $order->id(),
-      'remote_state' => $response_code,
-      'remote_id' => $remote_id,
-      // We set this one so payment which hasn't been save can read a balance.
-      'refunded_amount' => new Price(0, $order->getTotalPrice()->getCurrencyCode()),
-    ]);
+    // Get agreement status
+    $agreementStatus = $this->vippsService->agreementStatus($agreementId);
+    $message_variables['%os'] = $agreementStatus;
+    \Drupal::logger('vipps_recurring_commerce')->info(
+      t('Order %oid status: %os', $message_variables)
+    );
 
-    if($payment_method !== 'avtale_giro_bank_id') {
-      try {
-        $this->nets->processTransaction($payment, $action);
-      } catch(\Exception $e) {
-        $this->tempStore->delete('transaction_id');
-        throw new PaymentGatewayException("Authorization failed.");
-      }
+    switch ($agreementStatus) {
+      case 'PENDING':
+        $matching_payment->setState('authorization');
+        $matching_payment->save();
+        break;
+
+      case 'ACTIVE':
+        $matching_payment->setState('completed');
+        $matching_payment->save();
+        break;
+
+      case 'STOPPED':
+      case 'EXPIRED':
+      case 'CANCEL':
+      case 'REJECTED':
+        // @todo: There is no corresponding state in payment workflow but it's
+        // still better to keep the payment with invalid state than delete it
+        // entirely.
+        $matching_payment->setState('failed');
+        $matching_payment->save();
+
+      default:
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          t('Order %oid: Oooops, something went wrong.', $message_variables)
+        );
+        throw new PaymentGatewayException("Oooops, something went wrong.");
+        break;
     }
+  }
 
-    $payment->setState($action === 'SALE' ? 'completed' : 'authorization');
-    $payment->setAuthorizedTime($this->time->getCurrentTime());
-    $payment->save();
-
-    // Delete transaction if from the session now that we have it in entity.
-    $this->tempStore->delete('transaction_id');
+  /**
+   * Vipps treats onReturn and onCancel in the same way.
+   *
+   * {@inheritdoc}
+   */
+  public function onCancel(OrderInterface $order, Request $request) {
+    parent::onReturn($order, $request);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function voidPayment(PaymentInterface $payment, Price $amount = NULL) {
+  public function voidPayment(PaymentInterface $payment) {
     $this->assertPaymentState($payment, ['authorization']);
-
+    $remote_id = $payment->getRemoteId();
+    $order = $payment->getOrder();
     try {
-      // Void the payment.
-      $this->nets->processTransaction($payment, 'ANNUL');
+      $this->vippsService->cancelAgreement([$remote_id]);
     }
-    catch (\Exception $e) {
-      throw new SoftDeclineException(t('Unable to void payment. Message: @message', ['@message' => $e->getMessage()]));
+    catch (\Exception $exception) {
+      \Drupal::logger('vipps_recurring_commerce')->error(
+        t('Order %oid: Void operation failed.', [
+          '%oid' => $order->id(),
+        ])
+      );
+      throw new DeclineException($exception->getMessage());
     }
 
     $payment->setState('authorization_voided');
     $payment->save();
+    \Drupal::logger('vipps_recurring_commerce')->info(
+      t('Order %oid: Payment voided.', [
+        '%oid' => $order->id(),
+      ])
+    );
   }
 
   /**
    * {@inheritdoc}
    */
   public function capturePayment(PaymentInterface $payment, Price $amount = NULL) {
-    $this->assertPaymentState($payment, ['authorization']);
-
-    // If not specified, capture the entire amount.
-    $amount = $amount ?: $payment->getAmount();
-    $this->assertCaptureAmount($payment, $amount);
-
-    if ($amount->lessThan($payment->getAmount())) {
-      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $parent_payment */
-      $parent_payment = $payment;
-      $payment = $parent_payment->createDuplicate();
-    }
-
-    try {
-      $this->nets->processTransaction($payment, 'CAPTURE', $this->toMinorUnits($amount));
-    }
-    catch (\Exception $e) {
-      throw new SoftDeclineException(t('Unable to capture payment. Message @message', array('@message' => $e->getMessage())));
-    }
-
-    // Set transaction status and amount to the one captured.
-    $payment->setState('completed');
-    $payment->setAmount($amount);
-    $payment->save();
-
-    // Update parent payment if one exists.
-    if (isset($parent_payment)) {
-      $parent_payment->setAmount($parent_payment->getAmount()->subtract($amount));
-      if ($parent_payment->getAmount()->isZero()) {
-        $parent_payment->setState('authorization_voided');
-      }
-      $parent_payment->save();
-    }
+    return false;
   }
 
   /**
    * {@inheritdoc}
    */
   public function refundPayment(PaymentInterface $payment, Price $amount = NULL) {
+    // Validate.
     $this->assertPaymentState($payment, ['completed', 'partially_refunded']);
 
-    // If not specified, refund the entire amount.
-    $amount = $amount ?: $payment->getAmount();
-    $this->assertRefundAmount($payment, $amount);
+    // Let's do some refunds.
+    parent::assertRefundAmount($payment, $amount);
 
+    $remote_id = $payment->getRemoteId();
+    $number = $amount->multiply(100)->getNumber();
     try {
-      $this->nets->processTransaction($payment, 'CREDIT', $this->toMinorUnits($amount));
+      $service = \Drupal::service('vipps_recurring_payments.make_charges');
     }
-    catch (\Exception  $e) {
-      throw new SoftDeclineException(t('Unable to credit payment. Message: @message',
-        ['@message' => $e->getMessage()]));
+    catch (\Exception $exception) {
+      throw new DeclineException($exception->getMessage());
     }
 
-    // Set the state.
     $old_refunded_amount = $payment->getRefundedAmount();
     $new_refunded_amount = $old_refunded_amount->add($amount);
     if ($new_refunded_amount->lessThan($payment->getAmount())) {
@@ -461,9 +418,10 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     else {
       $payment->setState('refunded');
     }
-    $payment->setRefundedAmount($new_refunded_amount);
 
+    $payment->setRefundedAmount($new_refunded_amount);
     $payment->save();
+
   }
 
   /**
@@ -484,4 +442,77 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     }
   }
 
+  /**
+   * {@inheritdoc}
+   *
+   * Checks for status changes, and saves it.
+   */
+  public function onNotify(Request $request) {
+    // @todo: Validate order and payment existance.
+    /** @var \Drupal\commerce_payment\Entity\PaymentGatewayInterface $commerce_payment_gateway */
+    $commerce_payment_gateway = $request->attributes->get('commerce_payment_gateway');
+
+    /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
+    $order = $request->attributes->get('order');
+    if (!$order instanceof OrderInterface) {
+      return new Response('', Response::HTTP_FORBIDDEN);
+    }
+
+    $payment_storage = $this->entityTypeManager->getStorage('commerce_payment');
+
+    // Validate authorization header.
+    if ($order->getData('vipps_auth_key') !== $request->headers->get('Authorization')) {
+      return new Response('', Response::HTTP_FORBIDDEN);
+    }
+
+    $content = $request->getContent();
+
+    $message_variables = [
+      '%oid' => $order->id(),
+    ];
+
+    $remote_id = $request->attributes->get('remote_id');
+    $matching_payments = $payment_storage->loadByProperties(['remote_id' => $remote_id, 'payment_gateway' => $commerce_payment_gateway->id()]);
+    if (count($matching_payments) !== 1) {
+      \Drupal::logger('vipps_recurring_commerce')->critical(t('Order %oid: More than one matching payment found', $message_variables));
+      return new Response('', Response::HTTP_FORBIDDEN);
+    }
+    /** @var \Drupal\commerce_payment\Entity\PaymentInterface $matching_payment */
+    // $old_state = $matching_payment->getState()->getId();
+    $matching_payment = reset($matching_payments);
+
+    $content = json_decode($content, TRUE);
+    \Drupal::logger('vipps_recurring_commerce')->error(
+      t('Order %oid status: $os', [
+        '%oid' => $order->id(),
+        '%os' => $content['transactionInfo']['status'],
+      ])
+    );
+    switch ($content['transactionInfo']['status']) {
+      case 'RESERVED':
+        $matching_payment->setState('authorization');
+        break;
+
+      case 'SALE':
+        $matching_payment->setState('completed');
+        break;
+
+      case 'RESERVE_FAILED':
+      case 'SALE_FAILED':
+      case 'CANCELLED':
+      case 'REJECTED':
+        // @todo: There is no corresponding state in payment workflow but it's
+        // still better to keep the payment with invalid state than delete it
+        // entirely.
+        $matching_payment->setState('failed');
+        break;
+
+      default:
+        \Drupal::logger('vipps_recurring_commerce')->critical('Data: @data', ['@data' => $content]);
+        return new Response('', Response::HTTP_I_AM_A_TEAPOT);
+    }
+    $matching_payment->save();
+
+    return new Response('', Response::HTTP_OK);
+  }
 }
