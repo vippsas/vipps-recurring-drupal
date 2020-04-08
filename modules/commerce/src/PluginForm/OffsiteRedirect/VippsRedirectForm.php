@@ -50,6 +50,7 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
    * @param VippsHttpClient $httpClient
    * @param ChainOrderIdResolverInterface $chainOrderIdResolver
    * @param EventDispatcherInterface $eventDispatcher
+   * @param RequestStorageFactory $requestStorageFactory
    */
   public function __construct(VippsHttpClient $httpClient, ChainOrderIdResolverInterface $chainOrderIdResolver, EventDispatcherInterface $eventDispatcher, RequestStorageFactory $requestStorageFactory) {
     $this->httpClient = $httpClient;

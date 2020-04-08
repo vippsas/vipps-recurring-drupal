@@ -22,6 +22,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\vipps_recurring_payments\Form\SettingsForm;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments\Service\VippsService;
+use Drupal\vipps_recurring_payments\UseCase\ChargeItem;
 use http\Client\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -317,15 +318,22 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
       t('Order %oid status: %os', $message_variables)
     );
 
+    //Force to pending
+    $agreementStatus = 'PENDING';
+
     switch ($agreementStatus) {
       case 'PENDING':
         $matching_payment->setState('authorization');
         $matching_payment->save();
+        $order->getState()->applyTransitionById('place');
+        $order->save();
         break;
 
       case 'ACTIVE':
         $matching_payment->setState('completed');
         $matching_payment->save();
+        $order->getState()->applyTransitionById('place');
+        $order->save();
         break;
 
       case 'STOPPED':
@@ -337,6 +345,8 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
         // entirely.
         $matching_payment->setState('failed');
         $matching_payment->save();
+        $order->getState()->applyTransitionById('cancel');
+        $order->save();
 
       default:
         \Drupal::logger('vipps_recurring_commerce')->error(
@@ -388,13 +398,43 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    * {@inheritdoc}
    */
   public function capturePayment(PaymentInterface $payment, Price $amount = NULL) {
-    return false;
+    return true;
+    // Assert things.
+    $this->assertPaymentState($payment, ['authorization']);
+    // If not specified, capture the entire amount.
+    $amount = $amount ?: $payment->getAmount();
+    $agreementId = $payment->getRemoteId();
+    $chargeId = $this->vippsService->createChargeItem(
+      new ChargeItem($agreementId, (int)$amount->multiply(100)->getNumber(), t('Capture Payment')),
+      $this->httpClient->auth()
+    );
+
+
+    try {
+      $this->vippsService->captureCharges($agreementId, [$chargeId]);
+    }
+    catch (VippsException $exception) {
+      if ($exception->getError()->getCode() == 61) {
+        // Insufficient funds.
+        // Check if order has already been captured and for what amount,.
+
+      }
+      throw new DeclineException($exception->getMessage());
+    }
+    catch (\Exception $exception) {
+      throw new DeclineException($exception->getMessage());
+    }
+
+    $payment->setState('completed');
+    $payment->setAmount($amount);
+    $payment->save();
   }
 
   /**
    * {@inheritdoc}
    */
   public function refundPayment(PaymentInterface $payment, Price $amount = NULL) {
+    return true;
     // Validate.
     $this->assertPaymentState($payment, ['completed', 'partially_refunded']);
 
