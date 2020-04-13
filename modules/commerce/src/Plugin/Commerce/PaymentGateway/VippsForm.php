@@ -350,21 +350,18 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     );
 
     //Force to pending
-    $agreementStatus = 'PENDING';
+    //$agreementStatus = 'PENDING';
 
     switch ($agreementStatus) {
       case 'PENDING':
         $matching_payment->setState('authorization');
-        $matching_payment->save();
         $order->getState()->applyTransitionById('place');
-        $order->save();
         break;
 
       case 'ACTIVE':
         $matching_payment->setState('completed');
         $matching_payment->save();
         $order->getState()->applyTransitionById('place');
-        $order->save();
         break;
 
       case 'STOPPED':
@@ -375,9 +372,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
         // still better to keep the payment with invalid state than delete it
         // entirely.
         $matching_payment->setState('failed');
-        $matching_payment->save();
         $order->getState()->applyTransitionById('cancel');
-        $order->save();
 
       default:
         \Drupal::logger('vipps_recurring_commerce')->error(
@@ -386,6 +381,9 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
         throw new PaymentGatewayException("Oooops, something went wrong.");
         break;
     }
+
+    $matching_payment->save();
+    $order->save();
   }
 
   /**
@@ -428,57 +426,49 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
   /**
    * {@inheritdoc}
    */
-//  public function capturePayment(PaymentInterface $payment, Price $amount = NULL) {
-//    return true;
-//    // Assert things.
-//    $this->assertPaymentState($payment, ['authorization']);
-//    // If not specified, capture the entire amount.
-//    $amount = $amount ?: $payment->getAmount();
-//
-//    if ($amount->lessThan($payment->getAmount())) {
-//      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $parent_payment */
-//      $parent_payment = $payment;
-//      $payment = $parent_payment->createDuplicate();
-//    }
-//    $agreementId = $payment->getRemoteId();
-//
-//    try {
-//      $this->vippsService->captureCharges($agreementId, (int)$amount->multiply(100)->getNumber());
-//    }
-//    catch (VippsException $exception) {
-//      if ($exception->getError()->getCode() == 61) {
-//        // Insufficient funds.
-//        // Check if order has already been captured and for what amount,.
-//
-//      }
-//      throw new DeclineException($exception->getMessage());
-//    }
-//    catch (\Exception $exception) {
-//      throw new DeclineException($exception->getMessage());
-//    }
-//
-//    $payment->setState('completed');
-//    $payment->setAmount($amount);
-//    $payment->save();
-//  }
+  public function capturePayment(PaymentInterface $payment, Price $amount = NULL) {
+    return true;
+    // Assert things.
+    $this->assertPaymentState($payment, ['authorization']);
+    // If not specified, capture the entire amount.
+    $amount = $amount ?: $payment->getAmount();
+
+    if ($amount->lessThan($payment->getAmount())) {
+      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $parent_payment */
+      $parent_payment = $payment;
+      $payment = $parent_payment->createDuplicate();
+    }
+    $agreementId = $payment->getRemoteId();
+
+    try {
+      $this->vippsService->captureCharges($agreementId, (int)$amount->multiply(100)->getNumber());
+    }
+    catch (VippsException $exception) {
+      if ($exception->getError()->getCode() == 61) {
+        // Insufficient funds.
+        // Check if order has already been captured and for what amount,.
+
+      }
+      throw new DeclineException($exception->getMessage());
+    }
+    catch (\Exception $exception) {
+      throw new DeclineException($exception->getMessage());
+    }
+
+    $payment->setState('completed');
+    $payment->setAmount($amount);
+    $payment->save();
+  }
 
   /**
    * {@inheritdoc}
    */
   public function refundPayment(PaymentInterface $payment, Price $amount = NULL) {
-    return true;
-    // Validate.
-    $this->assertPaymentState($payment, ['completed', 'partially_refunded']);
+    $agreementId = $payment->getRemoteId();
 
-
-    $chargeController = new ChargeController( \Drupal::service('request_stack'), $this->vippsService, \Drupal::service('logger.factory'));
-
-    $remote_id = $payment->getRemoteId();
-    $number = $amount->multiply(100)->getNumber();
     try {
-      $chargeController->refund();
-    }
-    catch (\Exception $exception) {
+      $this->vippsService->refundCharges($agreementId, $amount->getNumber());
+    } catch (\Exception $exception) {
       throw new DeclineException($exception->getMessage());
     }
 
@@ -493,7 +483,6 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
 
     $payment->setRefundedAmount($new_refunded_amount);
     $payment->save();
-
   }
 
   /**

@@ -80,32 +80,55 @@ class VippsService
     return $response;
   }
 
-  public function refundCharges(Charges $chargesStorage):CreateChargesResponse {
+  public function refundCharges(/*Charges $chargesStorage*/string $agreementId, $amount):CreateChargesResponse {
     $token = $this->httpClient->auth();
 
     $response = new CreateChargesResponse();
 
-    foreach ($chargesStorage->getCharges() as $charge) {
+    $charges = $this->httpClient->getCharges($token, $agreementId);
+
+    foreach ($charges as $charge) {
       try {
         $product = $this->productSubscriptionRepository->getProduct();
-        $product->setPrice($charge->getPrice());
-        $product->setDescription($charge->getDescription());
+        $product->setPrice((float)$amount);
+        $product->setDescription($charge->description);
         $request = $this->requestStorageFactory->buildCreateChargeData(
           $product,
           new \DateTime()
         );
 
-        $refundResponse = $this->httpClient->refundCharge($token, $charge->getAgreementId(), $charge->getChargeId(), $request);
+        $refundResponse = $this->httpClient->refundCharge($token, $agreementId, $charge->id, $request);
         if ($refundResponse['status'] == 200 ) {
-          $response->addSuccessCharge($charge->getChargeId());
+          $response->addSuccessCharge($charge->id);
         } else {
-           $response->addError(new ResponseErrorItem($charge->getChargeId(), \GuzzleHttp\json_encode($refundResponse)));
+          $response->addError(new ResponseErrorItem($charge->id, \GuzzleHttp\json_encode($refundResponse)));
         }
       } catch (\Throwable $e) {
-         $response->addError(new ResponseErrorItem($charge->getChargeId(), $e->getMessage()));
+        $response->addError(new ResponseErrorItem($charge->id, $e->getMessage()));
       }
-
     }
+
+//    foreach ($chargesStorage->getCharges() as $charge) {
+//      try {
+//        $product = $this->productSubscriptionRepository->getProduct();
+//        $product->setPrice($charge->getPrice());
+//        $product->setDescription($charge->getDescription());
+//        $request = $this->requestStorageFactory->buildCreateChargeData(
+//          $product,
+//          new \DateTime()
+//        );
+//
+//        $refundResponse = $this->httpClient->refundCharge($token, $charge->getAgreementId(), $charge->getChargeId(), $request);
+//        if ($refundResponse['status'] == 200 ) {
+//          $response->addSuccessCharge($charge->getChargeId());
+//        } else {
+//           $response->addError(new ResponseErrorItem($charge->getChargeId(), \GuzzleHttp\json_encode($refundResponse)));
+//        }
+//      } catch (\Throwable $e) {
+//         $response->addError(new ResponseErrorItem($charge->getChargeId(), $e->getMessage()));
+//      }
+//
+//    }
 
     return $response;
   }
