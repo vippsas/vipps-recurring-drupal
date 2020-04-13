@@ -101,22 +101,25 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
       $order_changed = TRUE;
     }
 
+    /**
+     * @todo change frequency
+     */
     $intervalService = \Drupal::service('vipps_recurring_payments:charge_intervals');
-    $intervals = $intervalService->getIntervals('monthly');
+    $intervals = $intervalService->getIntervals($settings['frequency']);
 
+    /**
+     * @todo update the product description. We are using field_image_description
+     */
     $product = new VippsProductSubscription(
       $intervals['base_interval'],
       intval($intervals['base_interval_count']),
-      t('Recurring donation: ') . (int)$order->total_price->getValue()[0]['number'] . 'Kr',
+      t('Recurring payment: ') . $order->total_price->getValue()[0]['currency_code'] . (int) $order->total_price->getValue()[0]['number'],
       substr($order->get('field_image_description')->value,0, 44),
       'true'
     );
     $product->setPrice($order->total_price->getValue()[0]['number']);
 
     try {
-      /**
-       * @todo change the intervals monthly
-       */
       $draftAgreementResponse = $this->httpClient->draftAgreement(
         $token,
         $this->requestStorageFactory->buildDefaultDraftAgreement(
@@ -131,6 +134,9 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
       $url = $draftAgreementResponse->getVippsConfirmationUrl();
     }
     catch (Exception $exception) {
+      \Drupal::logger('vipps_recurring_commerce')->error(
+        'Order %oid: problems drafting the agreement', ['%oid' => $order->id()]
+      );
       throw new PaymentGatewayException($exception->getMessage());
     }
 
@@ -138,7 +144,7 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
     $payment->setRemoteId($draftAgreementResponse->getAgreementId());
     $payment->save();
     if ($order_changed === TRUE) {
-      $order->setData('agreementId', $draftAgreementResponse->getAgreementId());
+      $order->setData('vipps_current_transaction', $draftAgreementResponse->getAgreementId());
       $order->save();
     }
 

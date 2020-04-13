@@ -7,23 +7,6 @@ services:
       '@commerce_price.currency_repository',
       '@commerce_product.attribute_field_manager']
 
-  vipps_recurring_payments_commerce:transactionManager:
-    class: Drupal\vipps_recurring_payments_commerce\Service\TransactionManager
-    arguments: ['@database', '@logger.factory']
-
-  vipps_recurring_payments_commerce:queue_manager:
-    class: Drupal\vipps_recurring_payments_commerce\Service\QueueManager
-    arguments: [
-      '@vipps_recurring_payments:delay_manager',
-      '@logger.factory']
-
-  vipps_recurring_payments_commerce:entities_factory:
-    class: Drupal\vipps_recurring_payments_commerce\Factory\CommerceEntitiesFactory
-    arguments: [
-      '@current_user',
-      '@request_stack',
-      '@vipps_recurring_payments_commerce:commerce_repository']
-
   vipps_recurring_payments_commerce:cacheManager:
     class: Drupal\vipps_recurring_payments_commerce\Service\CacheManager
     arguments: ['@cache.entity']

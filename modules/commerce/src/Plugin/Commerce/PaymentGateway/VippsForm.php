@@ -19,12 +19,15 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\vipps_recurring_payments\Controller\ChargeController;
 use Drupal\vipps_recurring_payments\Form\SettingsForm;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments\Service\VippsService;
 use Drupal\vipps_recurring_payments\UseCase\ChargeItem;
 use http\Client\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\commerce_price\Price;
 use zaporylie\Vipps\Exceptions\VippsException;
@@ -206,6 +209,19 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
       '#weight' => 10,
     ];
 
+    $form['frequency'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Charge frequency'),
+      '#default_value' => $this->configuration['frequency'] ?? 'daily',
+      '#description' => $this->t('Define the charges frequency.'),
+      '#options' => [
+        'daily' => t('Daily'),
+        'weekly' => t('Weekly'),
+        'monthly' => t('Monthly'),
+        'yearly' => t('Yearly'),
+      ],
+    ];
+
     // Test credentials
     $form['test_env'] = [
       '#type' => 'details',
@@ -255,6 +271,19 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
       '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
     ];
 
+    $form['test_env']['test_frequency'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Charge frequency'),
+      '#default_value' => $this->configuration['test_frequency'] ?? 'daily',
+      '#description' => $this->t('Define the charges frequency.'),
+      '#options' => [
+        'daily' => t('Daily'),
+        'weekly' => t('Weekly'),
+        'monthly' => t('Monthly'),
+        'yearly' => t('Yearly'),
+      ],
+    ];
+
     $form['charge_retry_days'] = [
       '#type' => 'number',
       '#required' => true,
@@ -279,12 +308,14 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
       $this->configuration['test_subscription_key'] = $values['test_env']['test_subscription_key'];
       $this->configuration['test_client_id'] = $values['test_env']['test_client_id'];
       $this->configuration['test_client_descret'] = $values['test_env']['test_client_descret'];
+      $this->configuration['test_frequency'] = $values['test_env']['test_frequency'];
 
       $this->configuration['msn'] = $values['msn'];
       $this->configuration['access_token'] = $values['access_token'];
       $this->configuration['subscription_key'] = $values['subscription_key'];
       $this->configuration['client_id'] = $values['client_id'];
       $this->configuration['client_secret'] = $values['client_secret'];
+      $this->configuration['frequency'] = $values['frequency'];
       $this->configuration['charge_retry_days'] = $values['charge_retry_days'];
     }
   }
@@ -294,8 +325,8 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    * @throws \Exception
    */
   public function onReturn(OrderInterface $order, Request $request) {
-    $agreementId = $order->getData('agreementId');
     $payment_storage = $this->entityTypeManager->getStorage('commerce_payment');
+    $agreementId = $order->getData('vipps_current_transaction');
     $matching_payments = $payment_storage->loadByProperties(['remote_id' => $agreementId, 'order_id' => $order->id()]);
     $message_variables = [
       '%oid' => $order->id(),
@@ -315,7 +346,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     $agreementStatus = $this->vippsService->agreementStatus($agreementId);
     $message_variables['%os'] = $agreementStatus;
     \Drupal::logger('vipps_recurring_commerce')->info(
-      t('Order %oid status: %os', $message_variables)
+      'Order %oid status: %os', $message_variables
     );
 
     //Force to pending
@@ -350,7 +381,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
 
       default:
         \Drupal::logger('vipps_recurring_commerce')->error(
-          t('Order %oid: Oooops, something went wrong.', $message_variables)
+          'Order %oid: Oooops, something went wrong.', $message_variables
         );
         throw new PaymentGatewayException("Oooops, something went wrong.");
         break;
@@ -378,9 +409,9 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     }
     catch (\Exception $exception) {
       \Drupal::logger('vipps_recurring_commerce')->error(
-        t('Order %oid: Void operation failed.', [
-          '%oid' => $order->id(),
-        ])
+        'Order %oid: Void operation failed.', [
+          '%oid' => $order->id()
+          ]
       );
       throw new DeclineException($exception->getMessage());
     }
@@ -388,47 +419,48 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     $payment->setState('authorization_voided');
     $payment->save();
     \Drupal::logger('vipps_recurring_commerce')->info(
-      t('Order %oid: Payment voided.', [
+      'Order %oid: Payment voided.', [
         '%oid' => $order->id(),
-      ])
+      ]
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function capturePayment(PaymentInterface $payment, Price $amount = NULL) {
-    return true;
-    // Assert things.
-    $this->assertPaymentState($payment, ['authorization']);
-    // If not specified, capture the entire amount.
-    $amount = $amount ?: $payment->getAmount();
-    $agreementId = $payment->getRemoteId();
-    $chargeId = $this->vippsService->createChargeItem(
-      new ChargeItem($agreementId, (int)$amount->multiply(100)->getNumber(), t('Capture Payment')),
-      $this->httpClient->auth()
-    );
-
-
-    try {
-      $this->vippsService->captureCharges($agreementId, [$chargeId]);
-    }
-    catch (VippsException $exception) {
-      if ($exception->getError()->getCode() == 61) {
-        // Insufficient funds.
-        // Check if order has already been captured and for what amount,.
-
-      }
-      throw new DeclineException($exception->getMessage());
-    }
-    catch (\Exception $exception) {
-      throw new DeclineException($exception->getMessage());
-    }
-
-    $payment->setState('completed');
-    $payment->setAmount($amount);
-    $payment->save();
-  }
+//  public function capturePayment(PaymentInterface $payment, Price $amount = NULL) {
+//    return true;
+//    // Assert things.
+//    $this->assertPaymentState($payment, ['authorization']);
+//    // If not specified, capture the entire amount.
+//    $amount = $amount ?: $payment->getAmount();
+//
+//    if ($amount->lessThan($payment->getAmount())) {
+//      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $parent_payment */
+//      $parent_payment = $payment;
+//      $payment = $parent_payment->createDuplicate();
+//    }
+//    $agreementId = $payment->getRemoteId();
+//
+//    try {
+//      $this->vippsService->captureCharges($agreementId, (int)$amount->multiply(100)->getNumber());
+//    }
+//    catch (VippsException $exception) {
+//      if ($exception->getError()->getCode() == 61) {
+//        // Insufficient funds.
+//        // Check if order has already been captured and for what amount,.
+//
+//      }
+//      throw new DeclineException($exception->getMessage());
+//    }
+//    catch (\Exception $exception) {
+//      throw new DeclineException($exception->getMessage());
+//    }
+//
+//    $payment->setState('completed');
+//    $payment->setAmount($amount);
+//    $payment->save();
+//  }
 
   /**
    * {@inheritdoc}
@@ -438,13 +470,13 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     // Validate.
     $this->assertPaymentState($payment, ['completed', 'partially_refunded']);
 
-    // Let's do some refunds.
-    parent::assertRefundAmount($payment, $amount);
+
+    $chargeController = new ChargeController( \Drupal::service('request_stack'), $this->vippsService, \Drupal::service('logger.factory'));
 
     $remote_id = $payment->getRemoteId();
     $number = $amount->multiply(100)->getNumber();
     try {
-      $service = \Drupal::service('vipps_recurring_payments.make_charges');
+      $chargeController->refund();
     }
     catch (\Exception $exception) {
       throw new DeclineException($exception->getMessage());
@@ -487,7 +519,8 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    *
    * Checks for status changes, and saves it.
    */
-  public function onNotify(Request $request) {
+  public function onNotify(Request $request)
+  {
     // @todo: Validate order and payment existance.
     /** @var \Drupal\commerce_payment\Entity\PaymentGatewayInterface $commerce_payment_gateway */
     $commerce_payment_gateway = $request->attributes->get('commerce_payment_gateway');
@@ -528,31 +561,40 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
         '%os' => $content['transactionInfo']['status'],
       ])
     );
+
     switch ($content['transactionInfo']['status']) {
-      case 'RESERVED':
+      case 'PENDING':
         $matching_payment->setState('authorization');
+        $matching_payment->save();
+        $order->getState()->applyTransitionById('place');
+        $order->save();
         break;
 
-      case 'SALE':
+      case 'ACTIVE':
         $matching_payment->setState('completed');
+        $matching_payment->save();
+        $order->getState()->applyTransitionById('place');
+        $order->save();
         break;
 
-      case 'RESERVE_FAILED':
-      case 'SALE_FAILED':
-      case 'CANCELLED':
+      case 'STOPPED':
+      case 'EXPIRED':
+      case 'CANCEL':
       case 'REJECTED':
         // @todo: There is no corresponding state in payment workflow but it's
         // still better to keep the payment with invalid state than delete it
         // entirely.
         $matching_payment->setState('failed');
-        break;
+        $matching_payment->save();
+        $order->getState()->applyTransitionById('cancel');
+        $order->save();
 
       default:
-        \Drupal::logger('vipps_recurring_commerce')->critical('Data: @data', ['@data' => $content]);
-        return new Response('', Response::HTTP_I_AM_A_TEAPOT);
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          t('Order %oid: Oooops, something went wrong.', $message_variables)
+        );
+        throw new PaymentGatewayException("Oooops, something went wrong.");
+        break;
     }
-    $matching_payment->save();
-
-    return new Response('', Response::HTTP_OK);
   }
 }
