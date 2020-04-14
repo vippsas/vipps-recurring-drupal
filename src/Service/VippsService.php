@@ -80,7 +80,37 @@ class VippsService
     return $response;
   }
 
-  public function refundCharges(/*Charges $chargesStorage*/string $agreementId, $amount):CreateChargesResponse {
+  public function refundCharges(Charges $chargesStorage):CreateChargesResponse {
+    $token = $this->httpClient->auth();
+
+    $response = new CreateChargesResponse();
+
+    foreach ($chargesStorage->getCharges() as $charge) {
+      try {
+        $product = $this->productSubscriptionRepository->getProduct();
+        $product->setPrice($charge->getPrice());
+        $product->setDescription($charge->getDescription());
+        $request = $this->requestStorageFactory->buildCreateChargeData(
+          $product,
+          new \DateTime()
+        );
+
+        $refundResponse = $this->httpClient->refundCharge($token, $charge->getAgreementId(), $charge->getChargeId(), $request);
+        if ($refundResponse['status'] == 200 ) {
+          $response->addSuccessCharge($charge->getChargeId());
+        } else {
+           $response->addError(new ResponseErrorItem($charge->getChargeId(), \GuzzleHttp\json_encode($refundResponse)));
+        }
+      } catch (\Throwable $e) {
+         $response->addError(new ResponseErrorItem($charge->getChargeId(), $e->getMessage()));
+      }
+
+    }
+
+    return $response;
+  }
+
+  /*public function refundCharges(string $agreementId, $amount):CreateChargesResponse {
     $token = $this->httpClient->auth();
 
     $response = new CreateChargesResponse();
@@ -107,31 +137,8 @@ class VippsService
         $response->addError(new ResponseErrorItem($charge->id, $e->getMessage()));
       }
     }
-
-//    foreach ($chargesStorage->getCharges() as $charge) {
-//      try {
-//        $product = $this->productSubscriptionRepository->getProduct();
-//        $product->setPrice($charge->getPrice());
-//        $product->setDescription($charge->getDescription());
-//        $request = $this->requestStorageFactory->buildCreateChargeData(
-//          $product,
-//          new \DateTime()
-//        );
-//
-//        $refundResponse = $this->httpClient->refundCharge($token, $charge->getAgreementId(), $charge->getChargeId(), $request);
-//        if ($refundResponse['status'] == 200 ) {
-//          $response->addSuccessCharge($charge->getChargeId());
-//        } else {
-//           $response->addError(new ResponseErrorItem($charge->getChargeId(), \GuzzleHttp\json_encode($refundResponse)));
-//        }
-//      } catch (\Throwable $e) {
-//         $response->addError(new ResponseErrorItem($charge->getChargeId(), $e->getMessage()));
-//      }
-//
-//    }
-
     return $response;
-  }
+  }*/
 
   public function getAgreement(string $agreementId) {
     $token = $this->httpClient->auth();

@@ -433,38 +433,39 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     // If not specified, capture the entire amount.
     $amount = $amount ?: $payment->getAmount();
 
-    if ($amount->lessThan($payment->getAmount())) {
-      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $parent_payment */
-      $parent_payment = $payment;
-      $payment = $parent_payment->createDuplicate();
-    }
-    $agreementId = $payment->getRemoteId();
-
-    try {
-      $this->vippsService->captureCharges($agreementId, (int)$amount->multiply(100)->getNumber());
-    }
-    catch (VippsException $exception) {
-      if ($exception->getError()->getCode() == 61) {
-        // Insufficient funds.
-        // Check if order has already been captured and for what amount,.
-
-      }
-      throw new DeclineException($exception->getMessage());
-    }
-    catch (\Exception $exception) {
-      throw new DeclineException($exception->getMessage());
-    }
-
-    $payment->setState('completed');
-    $payment->setAmount($amount);
-    $payment->save();
+//    if ($amount->lessThan($payment->getAmount())) {
+//      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $parent_payment */
+//      $parent_payment = $payment;
+//      $payment = $parent_payment->createDuplicate();
+//    }
+//    $agreementId = $payment->getRemoteId();
+//
+//    try {
+//      $this->vippsService->captureCharges($agreementId, (int)$amount->multiply(100)->getNumber());
+//    }
+//    catch (VippsException $exception) {
+//      if ($exception->getError()->getCode() == 61) {
+//        // Insufficient funds.
+//        // Check if order has already been captured and for what amount,.
+//
+//      }
+//      throw new DeclineException($exception->getMessage());
+//    }
+//    catch (\Exception $exception) {
+//      throw new DeclineException($exception->getMessage());
+//    }
+//
+//    $payment->setState('completed');
+//    $payment->setAmount($amount);
+//    $payment->save();
   }
 
   /**
    * {@inheritdoc}
    */
   public function refundPayment(PaymentInterface $payment, Price $amount = NULL) {
-    $agreementId = $payment->getRemoteId();
+    return true;
+    /*$agreementId = $payment->getRemoteId();
 
     try {
       $this->vippsService->refundCharges($agreementId, $amount->getNumber());
@@ -482,7 +483,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     }
 
     $payment->setRefundedAmount($new_refunded_amount);
-    $payment->save();
+    $payment->save();*/
   }
 
   /**
