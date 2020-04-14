@@ -141,12 +141,13 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    */
   public function defaultConfiguration() {
     return [
+        'msn' => '',
+        'access_token' => '',
+        'subscription_key' => '',
         'client_id' => '',
-        'subscription_key_authorization' => '',
         'client_secret' => '',
-        'subscription_key_payment' => '',
-        'serial_number' => '',
-        'prefix' => '',
+        'frequency' => '',
+        'charge_retry_days' => '',
       ] + parent::defaultConfiguration();
   }
 

@@ -1,0 +1,24 @@
+commerce_payment.commerce_payment_gateway.plugin.vipps:
+  type: commerce_payment_gateway_configuration
+  mapping:
+    msn:
+      type: string
+      label: "MSN"
+    access_token:
+      type: string
+      label: "Ocp-Apim-Subscription-Key-Access-Token"
+    subscription_key:
+      type: string
+      label: "Ocp-Apim-Subscription-Key-Ecom"
+    client_id:
+      type: string
+      label: "Client id"
+    client_secret:
+      type: string
+      label: "Secret Key"
+    frequency:
+      type: string
+      label: "Charge frequency"
+    charge_retry_days:
+      type: string
+      label: "Retry days"
