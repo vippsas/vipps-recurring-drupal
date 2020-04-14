@@ -114,7 +114,7 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
       $intervals['base_interval'],
       intval($intervals['base_interval_count']),
       t('Recurring payment: ') . $order->total_price->getValue()[0]['currency_code'] . (int) $order->total_price->getValue()[0]['number'],
-      substr($order->get('field_image_description')->value,0, 44),
+      t('Initial Charge'),
       'true'
     );
     $product->setPrice($order->total_price->getValue()[0]['number']);
