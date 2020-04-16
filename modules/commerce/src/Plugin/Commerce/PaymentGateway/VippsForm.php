@@ -2,11 +2,12 @@
 
 namespace Drupal\vipps_recurring_payments_commerce\Plugin\Commerce\PaymentGateway;
 
+use Drupal\advancedqueue\Entity\Queue;
+use Drupal\advancedqueue\Job;
 use Drupal\commerce_payment\Entity\PaymentInterface;
 use Drupal\commerce_payment\Exception\DeclineException;
 use Drupal\commerce_payment\Exception\InvalidRequestException;
 use Drupal\commerce_payment\Exception\PaymentGatewayException;
-use Drupal\commerce_payment\Exception\SoftDeclineException;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsAuthorizationsInterface;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsRefundsInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
@@ -15,22 +16,19 @@ use Drupal\commerce_payment\PaymentTypeManager;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OffsitePaymentGatewayBase;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsVoidsInterface;
 use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
-use Drupal\vipps_recurring_payments\Controller\ChargeController;
+use Drupal\vipps_recurring_payments\Entity\PeriodicCharges;
+use Drupal\vipps_recurring_payments\Entity\VippsAgreements;
+use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
 use Drupal\vipps_recurring_payments\Form\SettingsForm;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments\Service\VippsService;
-use Drupal\vipps_recurring_payments\UseCase\ChargeItem;
 use http\Client\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\commerce_price\Price;
-use zaporylie\Vipps\Exceptions\VippsException;
 
 /**
  * Provides the Nets payment gateway.
@@ -335,7 +333,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
 
     if (count($matching_payments) !== 1) {
       \Drupal::logger('vipps_recurring_commerce')->error(
-        t('Order %oid: More than one matching payment found', $message_variables)
+        'Order %oid: More than one matching payment found', $message_variables
       );
       throw new PaymentGatewayException('More than one matching payment found');
     }
@@ -385,6 +383,8 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
 
     $matching_payment->save();
     $order->save();
+
+    $this->confirmAgreement($agreementId);
   }
 
   /**
@@ -547,10 +547,10 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
 
     $content = json_decode($content, TRUE);
     \Drupal::logger('vipps_recurring_commerce')->error(
-      t('Order %oid status: $os', [
+      'Order %oid status: $os', [
         '%oid' => $order->id(),
         '%os' => $content['transactionInfo']['status'],
-      ])
+      ]
     );
 
     switch ($content['transactionInfo']['status']) {
@@ -582,10 +582,106 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
 
       default:
         \Drupal::logger('vipps_recurring_commerce')->error(
-          t('Order %oid: Oooops, something went wrong.', $message_variables)
+          'Order %oid: Oooops, something went wrong.', $message_variables
         );
         throw new PaymentGatewayException("Oooops, something went wrong.");
         break;
     }
+
+    $this->confirmAgreement($remote_id);
+  }
+
+  /**
+   * @param $agreementId
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  private function confirmAgreement($agreementId) {
+    // Add agreement to job queue
+    $agreementData = $this->httpClient->getRetrieveAgreement(
+      $this->httpClient->auth(),
+      $agreementId
+    );
+
+    $message_variables = [
+      '%aid' => $agreementId,
+      '%as' => $agreementData->getStatus(),
+    ];
+
+    if(!$agreementData->isActive()) {
+      \Drupal::logger('vipps_recurring_commerce')->error(
+        'Order %oid: Agreement %aid has status %as', $message_variables
+      );
+      return;
+    }
+
+    $delayManager = \Drupal::service('vipps_recurring_payments:delay_manager');
+
+    /**
+     * Create a Node of vipps_agreement type
+     */
+    $agreementNode = new VippsAgreements([
+      'type' => 'vipps_agreements',
+    ], 'vipps_agreements');
+    $agreementNode->set('status', 1);
+    $agreementNode->setStatus($agreementData->getStatus());
+    $agreementNode->setIntervals($this->configuration['frequency'] ?? 'MONTHLY');
+    $agreementNode->setAgreementId($agreementId);
+    $agreementNode->setMobile('');
+    $agreementNode->setPrice($agreementData->getPrice());
+
+    $agreementNode->save();
+    $agreementNodeId = $agreementNode->id();
+
+    /**
+     * Store first charge as periodic_charges entity
+     */
+    $charges = $this->httpClient->getCharges(
+      $this->httpClient->auth(),
+      $agreementId
+    );
+
+    if (isset($charges)) {
+      $chargeNode = new PeriodicCharges([
+        'type' => 'periodic_charges',
+      ], 'periodic_charges');
+      $chargeNode->set('status', 1);
+      $chargeNode->setChargeId($charges[0]->id);
+      $chargeNode->setPrice($charges[0]->amount);
+      $chargeNode->setParentId($agreementNodeId);
+      $chargeNode->setStatus($charges[0]->status);
+      $chargeNode->setDescription($charges[0]->description);
+      $chargeNode->save();
+    }
+
+    $intervalService = \Drupal::service('vipps_recurring_payments:charge_intervals');
+    $intervals = $intervalService->getIntervals($this->configuration['frequency']);
+
+    /**
+     * @todo update descriptions
+     */
+    $product = new VippsProductSubscription(
+      $intervals['base_interval'],
+      intval($intervals['base_interval_count']),
+      "AAAAA",
+      "AAAAAA",
+      boolval(TRUE)
+    );
+    $product->setPrice($agreementData->getPrice());
+
+    $job = Job::create('create_charge_job_commerce', [
+      'orderId' => $agreementId,
+      'agreementNodeId' => $agreementNodeId
+    ]);
+
+    /**
+     * @todo use custom queue
+     */
+    $queue = Queue::load('default');
+    $queue->enqueueJob($job, $delayManager->getCountSecondsToNextPayment($product));
+
+    $message_variables['%aid'] = $agreementId;
+    \Drupal::logger('vipps_recurring_commerce')->info(
+      'Order %oid: Subscription %aid has been done successfully', $message_variables
+    );
   }
 }
