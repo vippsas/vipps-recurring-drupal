@@ -138,14 +138,16 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
+    $config = \Drupal::config('vipps_recurring_payments.settings');
+
     return [
-        'msn' => '',
-        'access_token' => '',
-        'subscription_key' => '',
-        'client_id' => '',
-        'client_secret' => '',
+        'msn' => $config->get('msn'),
+        'access_token' => $config->get('access_token'),
+        'subscription_key' => $config->get('subscription_key'),
+        'client_id' => $config->get('client_id'),
+        'client_secret' => $config->get('client_secret'),
         'frequency' => '',
-        'charge_retry_days' => '',
+        'charge_retry_days' => $config->get('charge_retry_days'),
       ] + parent::defaultConfiguration();
   }
 
@@ -155,62 +157,10 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildConfigurationForm($form, $form_state);
 
-    $configFactory = $this->configFactory->getEditable(SettingsForm::SETTINGS);
-    $rowData = $configFactory->getRawData();
-
-    $form['msn'] = [
-      '#type' => 'textfield',
-      '#required' => true,
-      '#maxlength' => 10,
-      '#title' => $this->t('MSN'),
-      '#default_value' => $this->configuration['msn'] ?? $rowData['msn'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-      '#weight' => 6,
-    ];
-
-    $form['access_token'] = [
-      '#type' => 'textfield',
-      '#required' => true,
-      '#maxlength' => 64,
-      '#title' => $this->t('Ocp-Apim-Subscription-Key-Access-Token'),
-      '#default_value' =>  $this->configuration['access_token'] ?? $rowData['access_token'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-      '#weight' => 7,
-    ];
-
-    $form['subscription_key'] = [
-      '#type' => 'textfield',
-      '#required' => true,
-      '#maxlength' => 64,
-      '#title' => $this->t('Ocp-Apim-Subscription-Key-Ecom'),
-      '#default_value' => $this->configuration['subscription_key'] ?? $rowData['subscription_key'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-      '#weight' => 8,
-    ];
-
-    $form['client_id'] = [
-      '#type' => 'textfield',
-      '#required' => true,
-      '#maxlength' => 64,
-      '#title' => $this->t('Client id'),
-      '#default_value' => $this->configuration['client_id'] ?? $rowData['client_id'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-      '#weight' => 9,
-    ];
-
-    $form['client_secret'] = [
-      '#type' => 'textfield',
-      '#required' => true,
-      '#maxlength' => 64,
-      '#title' => $this->t('Secret Key'),
-      '#default_value' => $this->configuration['client_secret'] ?? $rowData['client_secret'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-      '#weight' => 10,
-    ];
-
     $form['frequency'] = [
       '#type' => 'radios',
       '#title' => $this->t('Charge frequency'),
+      '#required' => true,
       '#default_value' => $this->configuration['frequency'] ?? 'daily',
       '#description' => $this->t('Define the charges frequency.'),
       '#options' => [
@@ -230,49 +180,10 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
       '#weight' => 11,
     ];
 
-    $form['test_env']['test_msn'] = [
-      '#type' => 'textfield',
-      '#maxlength' => 10,
-      '#title' => $this->t('Test MSN'),
-      '#default_value' => $this->configuration['test_msn'] ?? $rowData['test_msn'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-    ];
-
-    $form['test_env']['test_access_token'] = [
-      '#type' => 'textfield',
-      '#maxlength' => 64,
-      '#title' => $this->t('Test Access Token'),
-      '#default_value' => $this->configuration['test_access_token'] ?? $rowData['test_access_token'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-    ];
-
-    $form['test_env']['test_subscription_key'] = [
-      '#type' => 'textfield',
-      '#maxlength' => 64,
-      '#title' => $this->t('Test Subscription Key'),
-      '#default_value' => $this->configuration['test_subscription_key'] ?? $rowData['test_subscription_key'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-    ];
-
-    $form['test_env']['test_client_id'] = [
-      '#type' => 'textfield',
-      '#maxlength' => 64,
-      '#title' => $this->t('Test Client ID'),
-      '#default_value' => $this->configuration['test_client_id'] ?? $rowData['test_client_id'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-    ];
-
-    $form['test_env']['test_client_secret'] = [
-      '#type' => 'textfield',
-      '#maxlength' => 64,
-      '#title' => $this->t('Test Secret Key'),
-      '#default_value' => $this->configuration['test_client_secret'] ?? $rowData['test_client_secret'],
-      '#description' => $this->t('Get your API keys from your Vipps developer portal.'),
-    ];
-
     $form['test_env']['test_frequency'] = [
       '#type' => 'radios',
-      '#title' => $this->t('Charge frequency'),
+      '#title' => $this->t('Test Charge frequency'),
+      '#required' => true,
       '#default_value' => $this->configuration['test_frequency'] ?? 'daily',
       '#description' => $this->t('Define the charges frequency.'),
       '#options' => [
@@ -281,15 +192,6 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
         'monthly' => t('Monthly'),
         'yearly' => t('Yearly'),
       ],
-    ];
-
-    $form['charge_retry_days'] = [
-      '#type' => 'number',
-      '#required' => true,
-      '#title' => $this->t('Retry days'),
-      '#default_value' => $this->configuration['charge_retry_days'] ?? $rowData['charge_retry_days'],
-      '#weight' => 2,
-      '#description' => $this->t('Vipps will retry the charge for the number of days specified in "Retry days". If 0 it will be failed after the first attempt.')
     ];
 
     return array_merge($form);
@@ -302,20 +204,22 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     parent::submitConfigurationForm($form, $form_state);
     if (!$form_state->getErrors()) {
       $values = $form_state->getValue($form['#parents']);
-      $this->configuration['test_msn'] = $values['test_env']['test_msn'];
-      $this->configuration['test_access_token'] = $values['test_env']['test_access_token'];
-      $this->configuration['test_subscription_key'] = $values['test_env']['test_subscription_key'];
-      $this->configuration['test_client_id'] = $values['test_env']['test_client_id'];
-      $this->configuration['test_client_descret'] = $values['test_env']['test_client_descret'];
+      $config = \Drupal::config('vipps_recurring_payments.settings')->getRawData();
+
+      $this->configuration['test_msn'] = $config['test_msn'];
+      $this->configuration['test_access_token'] = $config['test_access_token'];
+      $this->configuration['test_subscription_key'] = $config['test_subscription_key'];
+      $this->configuration['test_client_id'] = $config['test_client_id'];
+      $this->configuration['test_client_secret'] = $config['test_client_secret'];
       $this->configuration['test_frequency'] = $values['test_env']['test_frequency'];
 
-      $this->configuration['msn'] = $values['msn'];
-      $this->configuration['access_token'] = $values['access_token'];
-      $this->configuration['subscription_key'] = $values['subscription_key'];
-      $this->configuration['client_id'] = $values['client_id'];
-      $this->configuration['client_secret'] = $values['client_secret'];
+      $this->configuration['msn'] = $config['msn'];
+      $this->configuration['access_token'] = $config['access_token'];
+      $this->configuration['subscription_key'] = $config['subscription_key'];
+      $this->configuration['client_id'] = $config['client_id'];
+      $this->configuration['client_secret'] = $config['client_secret'];
       $this->configuration['frequency'] = $values['frequency'];
-      $this->configuration['charge_retry_days'] = $values['charge_retry_days'];
+      $this->configuration['charge_retry_days'] = $config['charge_retry_days'];
     }
   }
 
