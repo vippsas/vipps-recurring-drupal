@@ -88,15 +88,9 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
       $order_changed = TRUE;
     }
 
-    /**
-     * @todo change frequency
-     */
     $intervalService = \Drupal::service('vipps_recurring_payments:charge_intervals');
     $intervals = $intervalService->getIntervals($settings['frequency']);
 
-    /**
-     * @todo update the product description. We are using field_image_description
-     */
     $product = new VippsProductSubscription(
       $intervals['base_interval'],
       intval($intervals['base_interval_count']),
@@ -127,8 +121,13 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
       throw new PaymentGatewayException($exception->getMessage());
     }
 
+    $charges = $this->httpClient->getCharges(
+      $this->httpClient->auth(),
+      $draftAgreementResponse->getAgreementId()
+    );
+
     // If the payment was successfully created at remote host.
-    $payment->setRemoteId($draftAgreementResponse->getAgreementId());
+    $payment->setRemoteId($charges[0]->id);
     $payment->save();
     if ($order_changed === TRUE) {
       $order->setData('vipps_current_transaction', $draftAgreementResponse->getAgreementId());

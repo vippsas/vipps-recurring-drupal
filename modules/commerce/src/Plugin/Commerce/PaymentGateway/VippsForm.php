@@ -25,6 +25,7 @@ use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments\Service\VippsService;
 use http\Client\Response;
+use mysql_xdevapi\Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\commerce_price\Price;
@@ -229,7 +230,11 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
   public function onReturn(OrderInterface $order, Request $request) {
     $payment_storage = $this->entityTypeManager->getStorage('commerce_payment');
     $agreementId = $order->getData('vipps_current_transaction');
-    $matching_payments = $payment_storage->loadByProperties(['remote_id' => $agreementId, 'order_id' => $order->id()]);
+    $charges = $this->httpClient->getCharges(
+      $this->httpClient->auth(),
+      $agreementId
+    );
+    $matching_payments = $payment_storage->loadByProperties(['remote_id' => $charges['0']->id, 'order_id' => $order->id()]);
     $message_variables = [
       '%oid' => $order->id(),
     ];
@@ -250,9 +255,6 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     \Drupal::logger('vipps_recurring_commerce')->info(
       'Order %oid status: %os', $message_variables
     );
-
-    //Force to pending
-    //$agreementStatus = 'PENDING';
 
     switch ($agreementStatus) {
       case 'PENDING':
@@ -304,10 +306,14 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    */
   public function voidPayment(PaymentInterface $payment) {
     $this->assertPaymentState($payment, ['authorization']);
-    $remote_id = $payment->getRemoteId();
+
     $order = $payment->getOrder();
+    $agreementId = $order->getData('vipps_current_transaction');
+    $token = $this->httpClient->auth();
+    $chargeId = $payment->getRemoteId();
+
     try {
-      $this->vippsService->cancelAgreement([$remote_id]);
+      $this->httpClient->cancelCharge($token, $agreementId, $chargeId);
     }
     catch (\Exception $exception) {
       \Drupal::logger('vipps_recurring_commerce')->error(
@@ -331,49 +337,106 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    * {@inheritdoc}
    */
   public function capturePayment(PaymentInterface $payment, Price $amount = NULL) {
-    return true;
     // Assert things.
     $this->assertPaymentState($payment, ['authorization']);
     // If not specified, capture the entire amount.
     $amount = $amount ?: $payment->getAmount();
 
-//    if ($amount->lessThan($payment->getAmount())) {
-//      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $parent_payment */
-//      $parent_payment = $payment;
-//      $payment = $parent_payment->createDuplicate();
-//    }
-//    $agreementId = $payment->getRemoteId();
-//
-//    try {
-//      $this->vippsService->captureCharges($agreementId, (int)$amount->multiply(100)->getNumber());
-//    }
-//    catch (VippsException $exception) {
-//      if ($exception->getError()->getCode() == 61) {
-//        // Insufficient funds.
-//        // Check if order has already been captured and for what amount,.
-//
-//      }
-//      throw new DeclineException($exception->getMessage());
-//    }
-//    catch (\Exception $exception) {
-//      throw new DeclineException($exception->getMessage());
-//    }
-//
-//    $payment->setState('completed');
-//    $payment->setAmount($amount);
-//    $payment->save();
+    if ($amount->lessThan($payment->getAmount())) {
+      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $parent_payment */
+      $parent_payment = $payment;
+      $payment = $parent_payment->createDuplicate();
+    }
+
+    $order = $payment->getOrder();
+    $agreementId = $order->getData('vipps_current_transaction');
+    $requestStorageFactory = \Drupal::service('vipps_recurring_payments:request_storage_factory');
+
+    // Get charge
+    $charge = $this->httpClient->getCharge($this->httpClient->auth(), $agreementId, $payment->getRemoteId());
+    $token = $this->httpClient->auth();
+
+    if($charge->getStatus() == 'RESERVED') {
+      $product_repo = \Drupal::service('vipps_recurring_payments:product_subscription_repository');
+      $product = $product_repo->getProduct();
+
+      $product->setDescription(t('Capture ') . $amount->getNumber() . $amount->getCurrencyCode() . t(' for Agreement') . $agreementId);
+      $product->setPrice($amount->getNumber());
+
+      $request = $requestStorageFactory->buildCreateChargeData(
+        $product,
+        new \DateTime()
+      );
+
+      try {
+        $this->httpClient->captureCharge($token, $agreementId, $charge->getId(), $request);
+      } catch (\Exception $exception) {
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          'Order %oid: Capture operation failed.', [
+            '%oid' => $order->id()
+          ]
+        );
+        throw new DeclineException($exception->getMessage());
+      }
+
+      $payment->setState('completed');
+      $payment->setAmount($amount);
+      $payment->save();
+
+      // Update parent payment if one exists.
+      if (isset($parent_payment)) {
+        $parent_payment->setAmount($parent_payment->getAmount()->subtract($amount));
+        if ($parent_payment->getAmount()->isZero()) {
+          $parent_payment->setState('authorization_voided');
+        }
+        $parent_payment->save();
+      }
+
+      \Drupal::logger('vipps_recurring_commerce')->info(
+        'Order %oid: Payment Captured.', [
+          '%oid' => $order->id()
+        ]
+      );
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function refundPayment(PaymentInterface $payment, Price $amount = NULL) {
-    return true;
-    /*$agreementId = $payment->getRemoteId();
+    // Validate.
+    $this->assertPaymentState($payment, ['completed', 'partially_refunded']);
+
+    // Let's do some refunds.
+    parent::assertRefundAmount($payment, $amount);
+
+    $order = $payment->getOrder();
+    $agreementId = $order->getData('vipps_current_transaction');
+    $requestStorageFactory = \Drupal::service('vipps_recurring_payments:request_storage_factory');
+
+    // Get charge
+    $charge = $this->httpClient->getCharge($this->httpClient->auth(), $agreementId, $payment->getRemoteId());
+    $token = $this->httpClient->auth();
+
+    $product_repo = \Drupal::service('vipps_recurring_payments:product_subscription_repository');
+    $product = $product_repo->getProduct();
+
+    $product->setDescription(t('Refund ') . $amount->getNumber() . $amount->getCurrencyCode() . t(' for Agreement') . $agreementId);
+    $product->setPrice($amount->getNumber());
+
+    $request = $requestStorageFactory->buildCreateChargeData(
+      $product,
+      new \DateTime()
+    );
 
     try {
-      $this->vippsService->refundCharges($agreementId, $amount->getNumber());
+      $this->httpClient->refundCharge($token, $agreementId, $charge->getId(), $request);
     } catch (\Exception $exception) {
+      \Drupal::logger('vipps_recurring_commerce')->error(
+        'Order %oid: Refund operation failed.', [
+          '%oid' => $order->id()
+        ]
+      );
       throw new DeclineException($exception->getMessage());
     }
 
@@ -387,7 +450,13 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     }
 
     $payment->setRefundedAmount($new_refunded_amount);
-    $payment->save();*/
+    $payment->save();
+
+    \Drupal::logger('vipps_recurring_commerce')->error(
+      'Order %oid: Payment refunded.', [
+        '%oid' => $order->id()
+      ]
+    );
   }
 
   /**
@@ -412,6 +481,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
    * {@inheritdoc}
    *
    * Checks for status changes, and saves it.
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function onNotify(Request $request)
   {
@@ -439,7 +509,12 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     ];
 
     $remote_id = $request->attributes->get('remote_id');
-    $matching_payments = $payment_storage->loadByProperties(['remote_id' => $remote_id, 'payment_gateway' => $commerce_payment_gateway->id()]);
+    $charges = $this->httpClient->getCharges(
+      $this->httpClient->auth(),
+      $remote_id
+    );
+
+    $matching_payments = $payment_storage->loadByProperties(['remote_id' => $charges['0']->id, 'payment_gateway' => $commerce_payment_gateway->id()]);
     if (count($matching_payments) !== 1) {
       \Drupal::logger('vipps_recurring_commerce')->critical(t('Order %oid: More than one matching payment found', $message_variables));
       return new Response('', Response::HTTP_FORBIDDEN);
