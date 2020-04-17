@@ -12,8 +12,6 @@ use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
 use Drupal\vipps_recurring_payments\Factory\RequestStorageFactory;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments_commerce\Plugin\Commerce\PaymentGateway\VippsForm;
-use Drupal\vipps_recurring_payments_commerce\Resolver\ChainOrderIdResolverInterface;
-use Drupal\vipps_recurring_payments_commerce\Service\CommerceService;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -30,11 +28,6 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
   protected $httpClient;
 
   /**
-   * @var ChainOrderIdResolverInterface
-   */
-  protected $chainOrderIdResolver;
-
-  /**
    * @var EventDispatcherInterface
    */
   protected $eventDispatcher;
@@ -48,13 +41,11 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
    * VippsLandingPageRedirectForm constructor.
    *
    * @param VippsHttpClient $httpClient
-   * @param ChainOrderIdResolverInterface $chainOrderIdResolver
    * @param EventDispatcherInterface $eventDispatcher
    * @param RequestStorageFactory $requestStorageFactory
    */
-  public function __construct(VippsHttpClient $httpClient, ChainOrderIdResolverInterface $chainOrderIdResolver, EventDispatcherInterface $eventDispatcher, RequestStorageFactory $requestStorageFactory) {
+  public function __construct(VippsHttpClient $httpClient, EventDispatcherInterface $eventDispatcher, RequestStorageFactory $requestStorageFactory) {
     $this->httpClient = $httpClient;
-    $this->chainOrderIdResolver = $chainOrderIdResolver;
     $this->eventDispatcher = $eventDispatcher;
     $this->requestStorageFactory = $requestStorageFactory;
   }
@@ -65,7 +56,6 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('vipps_recurring_payments:http_client'),
-      $container->get('vipps_recurring_payments_commerce.chain_order_id_resolver'),
       $container->get('event_dispatcher'),
       $container->get('vipps_recurring_payments:request_storage_factory')
     );
@@ -84,9 +74,6 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
     $settings = $payment->getPaymentGateway()->getPluginConfiguration();
 
     $token = $this->httpClient->auth();
-
-    // Create payment.
-    //$payment->setRemoteId($settings['prefix'] . $this->chainOrderIdResolver->resolve());
 
     // Save order.
     $order = $payment->getOrder();

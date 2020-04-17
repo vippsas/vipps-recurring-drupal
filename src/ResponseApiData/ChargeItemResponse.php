@@ -27,7 +27,7 @@ class ChargeItemResponse
   {
     try {
       /* @var $responseStd \stdClass */
-      $responseStd = json_decode($response->getBody());
+      $responseStd = json_decode($response->getBody()->getContents());
 
       $this->id = $responseStd->id;
       $this->status = $responseStd->status;

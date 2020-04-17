@@ -21,7 +21,7 @@ use Drupal\vipps_recurring_payments\UseCase\ChargeItem;
 
 /**
  * @AdvancedQueueJobType(
- *   id = "create_charge_job_commerce",
+ *   id = "create_charge_job",
  *   label = @Translation("Create charge queue"),
  * )
  */
@@ -85,6 +85,7 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
    */
   public function process(Job $job) {
     try {
+
       $payload = $job->getPayload();
 
       $agreementId = $payload['orderId'];
@@ -93,12 +94,13 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
       $agreementNode->getPrice();
 
       $chargeId = $this->vippsService->createChargeItem(
-        new ChargeItem($agreementId, $this->product->getIntegerPrice()),
+        new ChargeItem($agreementId, $agreementNode->getPrice(), t('Recurring charge %chv for Agreement %aid') . ['%chv' => $agreementNode->getPrice(), '%aid' => $agreementId]),
         $this->httpClient->auth()
       );
 
       // Get charge
       $charge = $this->httpClient->getCharge($this->httpClient->auth(), $agreementId, $chargeId);
+
       // Store charge in periodic_charges entity
       if (isset($charge)) {
         $chargeNode = new PeriodicCharges([
@@ -113,11 +115,11 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
         $chargeNode->save();
 
         // Add new job to queue for the next charge
-        $job = Job::create('create_charge_job_commerce', [
+        $job = Job::create('create_charge_job', [
           'orderId' => $agreementId,
           'agreementNodeId' => $agreementNodeId
         ]);
-        $queue = Queue::load('default'); //TODO use custom queue
+        $queue = Queue::load('vipps_recurring_payments');
         $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($this->product));
 
         $this->logger->info(

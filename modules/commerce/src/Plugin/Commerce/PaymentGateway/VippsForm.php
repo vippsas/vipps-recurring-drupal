@@ -22,7 +22,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\vipps_recurring_payments\Entity\PeriodicCharges;
 use Drupal\vipps_recurring_payments\Entity\VippsAgreements;
 use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
-use Drupal\vipps_recurring_payments\Form\SettingsForm;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments\Service\VippsService;
 use http\Client\Response;
@@ -34,7 +33,7 @@ use Drupal\commerce_price\Price;
  * Provides the Nets payment gateway.
  *
  * @CommercePaymentGateway(
- *   id = "vipss_recurring_checkout",
+ *   id = "vipps_recurring_checkout",
  *   label = "Vipps Recurring Checkout",
  *   display_label = "Vipps Recurring Checkout",
  *    forms = {
@@ -566,21 +565,18 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     $product = new VippsProductSubscription(
       $intervals['base_interval'],
       intval($intervals['base_interval_count']),
-      "AAAAA",
-      "AAAAAA",
+      t('Recurring payment: ') . $agreementData->getPrice(),
+      t('Initial Charge'),
       boolval(TRUE)
     );
     $product->setPrice($agreementData->getPrice());
 
-    $job = Job::create('create_charge_job_commerce', [
+    $job = Job::create('create_charge_job', [
       'orderId' => $agreementId,
       'agreementNodeId' => $agreementNodeId
     ]);
 
-    /**
-     * @todo use custom queue
-     */
-    $queue = Queue::load('default');
+    $queue = Queue::load('vipps_recurring_payments');
     $queue->enqueueJob($job, $delayManager->getCountSecondsToNextPayment($product));
 
     $message_variables['%aid'] = $agreementId;

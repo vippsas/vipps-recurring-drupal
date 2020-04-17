@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - vipps_recurring_payments_commerce
+id: vipps_recurring
+label: 'Vipps recurring'
+weight: null
+plugin: vipps_recurring_checkout
+configuration:
+  msn: ''
+  access_token: ''
+  subscription_key: ''
+  client_id: ''
+  client_secret: ''
+  frequency: monthly
+  charge_retry_days: '5'
+  display_label: 'Vipps Recurring Checkout'
+  mode: test
+  collect_billing_information: true
+  test_msn: ''
+  test_access_token: ''
+  test_subscription_key: ''
+  test_client_id: ''
+  test_client_secret: ''
+  test_frequency: monthly
+conditions: {  }
+conditionOperator: AND
