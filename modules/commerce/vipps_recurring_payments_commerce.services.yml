@@ -1,4 +1,0 @@
-services:
-  vipps_recurring_payments_commerce:cacheManager:
-    class: Drupal\vipps_recurring_payments_commerce\Service\CacheManager
-    arguments: ['@cache.entity']
