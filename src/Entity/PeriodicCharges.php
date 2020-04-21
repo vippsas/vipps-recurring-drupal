@@ -51,15 +51,15 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "description" = "description"
  *   },
  *   links = {
- *     "canonical" = "/admin/vipps/periodic_charges/{periodic_charges}",
- *     "add-form" = "/admin/vipps/periodic_charges/add",
- *     "edit-form" = "/admin/vipps/periodic_charges/{periodic_charges}/edit",
- *     "delete-form" = "/admin/vipps/periodic_charges/{periodic_charges}/delete",
- *     "version-history" = "/admin/vipps/periodic_charges/{periodic_charges}/revisions",
- *     "revision" = "/admin/vipps/periodic_charges/{periodic_charges}/revisions/{periodic_charges_revision}/view",
- *     "revision_revert" = "/admin/vipps/periodic_charges/{periodic_charges}/revisions/{periodic_charges_revision}/revert",
- *     "revision_delete" = "/admin/vipps/periodic_charges/{periodic_charges}/revisions/{periodic_charges_revision}/delete",
- *     "collection" = "/admin/vipps/periodic_charges",
+ *     "canonical" = "/admin/config/vipps/periodic-charges/{periodic_charges}",
+ *     "add-form" = "/admin/config/vipps/periodic-charges/add",
+ *     "edit-form" = "/admin/config/vipps/periodic-charges/{periodic_charges}/edit",
+ *     "delete-form" = "/admin/config/vipps/periodic-charges/{periodic_charges}/delete",
+ *     "version-history" = "/admin/config/vipps/periodic-charges/{periodic_charges}/revisions",
+ *     "revision" = "/admin/config/vipps/periodic-charges/{periodic_charges}/revisions/{periodic_charges_revision}/view",
+ *     "revision_revert" = "/admin/config/vipps/periodic-charges/{periodic_charges}/revisions/{periodic_charges_revision}/revert",
+ *     "revision_delete" = "/admin/config/vipps/periodic-charges/{periodic_charges}/revisions/{periodic_charges_revision}/delete",
+ *     "collection" = "/admin/config/vipps/periodic-charges",
  *   },
  *   field_ui_base_route = "periodic_charges.settings"
  * )

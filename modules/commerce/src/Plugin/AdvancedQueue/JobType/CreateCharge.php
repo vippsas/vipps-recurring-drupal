@@ -3,6 +3,7 @@
 namespace Drupal\vipps_recurring_payments_commerce\Plugin\AdvancedQueue\JobType;
 
 use Drupal\advancedqueue\Annotation\AdvancedQueueJobType;
+use Drupal\commerce_payment\Entity\Payment;
 use Drupal\Core\Annotation\Translation;
 use Drupal\vipps_recurring_payments\Service\DelayManager;
 use Drupal\advancedqueue\Job;
@@ -21,8 +22,8 @@ use Drupal\vipps_recurring_payments\UseCase\ChargeItem;
 
 /**
  * @AdvancedQueueJobType(
- *   id = "create_charge_job",
- *   label = @Translation("Create charge queue"),
+ *   id = "create_charge_job_commerce",
+ *   label = @Translation("Create charge queue - Commerce"),
  * )
  */
 class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterface
@@ -93,13 +94,35 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
       $agreementNode = VippsAgreements::load($agreementNodeId);
       $agreementNode->getPrice();
 
-      $chargeId = $this->vippsService->createChargeItem(
-        new ChargeItem($agreementId, $agreementNode->getPrice(), t('Recurring charge %chv for Agreement %aid') . ['%chv' => $agreementNode->getPrice(), '%aid' => $agreementId]),
-        $this->httpClient->auth()
-      );
+      $message_variables = ['%aid' => $agreementId];
 
-      // Get charge
-      $charge = $this->httpClient->getCharge($this->httpClient->auth(), $agreementId, $chargeId);
+      try {
+        $chargeId = $this->vippsService->createChargeItem(
+          new ChargeItem($agreementId, $agreementNode->getPrice(), 'Recurring charge ' . $agreementNode->getPrice()/100),
+          $this->httpClient->auth()
+        );
+      } catch (\Exception $exception) {
+        $message_variables['%m'] = $exception->getMessage();
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          'Agreement %aid: Problem creating charge. Message: %m',
+          $message_variables
+        );
+        throw new \Exception($exception->getMessage());
+      }
+
+      $message_variables['%cid'] = $chargeId;
+
+      try {
+        // Get charge
+        $charge = $this->httpClient->getCharge($this->httpClient->auth(), $agreementId, $chargeId);
+      } catch (\Exception $exception) {
+        $message_variables['%m'] = $exception->getMessage();
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          'Agreement %aid: Problem getting charge %cid. Message: %m',
+          $message_variables
+        );
+        throw new \Exception($exception->getMessage());
+      }
 
       // Store charge in periodic_charges entity
       if (isset($charge)) {
@@ -115,12 +138,50 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
         $chargeNode->save();
 
         // Add new job to queue for the next charge
-        $job = Job::create('create_charge_job', [
+        $job = Job::create('create_charge_job_commerce', [
           'orderId' => $agreementId,
           'agreementNodeId' => $agreementNodeId
         ]);
         $queue = Queue::load('vipps_recurring_payments');
         $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($this->product));
+
+        try {
+          // Get charges
+          $charges = $this->httpClient->getCharges($this->httpClient->auth(), $agreementId);
+        } catch (\Exception $exception) {
+          $message_variables['%m'] = $exception->getMessage();
+          \Drupal::logger('vipps_recurring_commerce')->error(
+            'Agreement %aid: Problem getting charges. Message: %m',
+            $message_variables
+          );
+          throw new \Exception($exception->getMessage());
+        }
+
+        //Get first charge
+        $first_charge = $charges[0];
+
+        // Get payment associated to charge
+        /** @var \Drupal\commerce_payment\Entity\PaymentInterface $payment */
+        $payment = \Drupal::entityTypeManager()
+          ->getStorage('commerce_payment')
+          ->loadByRemoteId($first_charge->id);
+
+        $order = $payment->getOrder();
+
+        $payment_new = Payment::create([
+          'payment_gateway' => $payment->getPaymentGateway()->id(),
+          'order_id' => $order->id(),
+          'amount' => $charge->getAmount(),
+          'state' => 'completed',
+        ]);
+        $payment_new->save();
+
+        \Drupal::logger('vipps_recurring_commerce')->info(
+          'Order %oid: Payment %pid.', [
+            '%oid' => $order->id(),
+            '%pid' => $payment_new->id(),
+          ]
+        );
 
         $this->logger->info(
           sprintf("Charge for %s has been done successfully", $agreementId)

@@ -20,9 +20,6 @@ use Drupal\Core\Render\Element;
  *   - attributes: HTML attributes for the containing element.
  */
 function template_preprocess_periodic_charges(array &$variables) {
-  // Fetch PeriodicCharges Entity Object.
-  $periodic_charges = $variables['elements']['#periodic_charges'];
-
   // Helpful $content variable for templates.
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];

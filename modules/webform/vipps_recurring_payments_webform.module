@@ -5,6 +5,24 @@
  * Contains vipps_recurring_payments_webform.module.
  */
 
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function vipps_recurring_payments_webform_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the commerce module.
+    case 'help.page.vipps_recurring_payments_webform':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Use Webform with Vipps Recurring Payments') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
 /**
  * Implements hook_uninstall().
  */

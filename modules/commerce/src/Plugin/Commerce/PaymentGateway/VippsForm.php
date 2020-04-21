@@ -174,7 +174,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     // Test credentials
     $form['test_env'] = [
       '#type' => 'details',
-      '#title' => $this->t('Test environment'),
+      '#title' => $this->t('Test Environment API'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
       '#weight' => 11,
@@ -270,13 +270,13 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
 
       case 'STOPPED':
       case 'EXPIRED':
-      case 'CANCEL':
-      case 'REJECTED':
-        // @todo: There is no corresponding state in payment workflow but it's
-        // still better to keep the payment with invalid state than delete it
-        // entirely.
         $matching_payment->setState('failed');
         $order->getState()->applyTransitionById('cancel');
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          'Order %oid: Oooops, something went wrong.', $message_variables
+        );
+        throw new PaymentGatewayException("Oooops, something went wrong.");
+        break;
 
       default:
         \Drupal::logger('vipps_recurring_commerce')->error(
@@ -460,27 +460,13 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
   }
 
   /**
-   * Asserts that the refund amount is valid.
-   *
-   * @param \Drupal\commerce_payment\Entity\PaymentInterface $payment
-   *   The payment.
-   * @param \Drupal\commerce_price\Price $capture_amount
-   *   The amount to be captured.
-   *
-   * @throws \Drupal\commerce_payment\Exception\InvalidRequestException
-   *   Thrown when the capture amount is larger than the payment amount.
-   */
-  protected function assertCaptureAmount(PaymentInterface $payment, Price $capture_amount) {
-    $amount = $payment->getAmount();
-    if ($capture_amount->greaterThan($amount)) {
-      throw new InvalidRequestException(sprintf("Can't capture more than %s.", $amount->__toString()));
-    }
-  }
-
-  /**
    * {@inheritdoc}
    *
    * Checks for status changes, and saves it.
+   * @param Request $request
+   * @return Response
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function onNotify(Request $request)
@@ -548,15 +534,15 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
 
       case 'STOPPED':
       case 'EXPIRED':
-      case 'CANCEL':
-      case 'REJECTED':
-        // @todo: There is no corresponding state in payment workflow but it's
-        // still better to keep the payment with invalid state than delete it
-        // entirely.
         $matching_payment->setState('failed');
         $matching_payment->save();
         $order->getState()->applyTransitionById('cancel');
         $order->save();
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          'Order %oid: Oooops, something went wrong.', $message_variables
+        );
+        throw new PaymentGatewayException("Oooops, something went wrong.");
+        break;
 
       default:
         \Drupal::logger('vipps_recurring_commerce')->error(
@@ -646,7 +632,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     );
     $product->setPrice($agreementData->getPrice());
 
-    $job = Job::create('create_charge_job', [
+    $job = Job::create('create_charge_job_commerce', [
       'orderId' => $agreementId,
       'agreementNodeId' => $agreementNodeId
     ]);

@@ -121,10 +121,17 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
       throw new PaymentGatewayException($exception->getMessage());
     }
 
-    $charges = $this->httpClient->getCharges(
-      $this->httpClient->auth(),
-      $draftAgreementResponse->getAgreementId()
-    );
+    try {
+      $charges = $this->httpClient->getCharges(
+        $this->httpClient->auth(),
+        $draftAgreementResponse->getAgreementId()
+      );
+    } catch (Exception $exception) {
+      \Drupal::logger('vipps_recurring_commerce')->error(
+        'Order %oid: problems getting the charges', ['%oid' => $order->id()]
+      );
+      throw new PaymentGatewayException($exception->getMessage());
+    }
 
     // If the payment was successfully created at remote host.
     $payment->setRemoteId($charges[0]->id);
