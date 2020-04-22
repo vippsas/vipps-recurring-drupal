@@ -1,6 +1,7 @@
 system.vipps:
   path: '/admin/config/vipps'
   defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
     _title: 'Vipps configuration options'
   requirements:
     _permission: 'administer site configuration'
