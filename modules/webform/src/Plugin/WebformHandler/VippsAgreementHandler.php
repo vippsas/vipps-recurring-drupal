@@ -103,14 +103,14 @@ class VippsAgreementHandler extends WebformHandlerBase
         'yearly' => $this->t('Yearly'),
       ],
       '#default_value' => $this->configuration['charge_interval'],
-      '#description' => 'How often make charges'
+      '#description' => 'How often to charge'
     ];
 
     // Initial charge
     $form['vipps_handler']['initial_charge'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Initial charge'),
-      '#description' => $this->t('Will be performed the initial charge when creating an agreement'),
+      '#description' => $this->t('Charge money immediately when a subscription is created'),
       '#default_value' => $this->configuration['initial_charge'],
       '#return_value' => TRUE,
     ];
@@ -119,7 +119,7 @@ class VippsAgreementHandler extends WebformHandlerBase
     $form['vipps_handler']['agreement_title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Agreement title'),
-      '#description' => $this->t('The request parameter when creating an agreement'),
+      '#description' => $this->t('Title of the agreement'),
       '#default_value' => $this->configuration['agreement_title'],
       '#return_value' => TRUE,
     ];
@@ -128,7 +128,7 @@ class VippsAgreementHandler extends WebformHandlerBase
     $form['vipps_handler']['agreement_description'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Agreement description'),
-      '#description' => $this->t('The request parameter when creating an agreement'),
+      '#description' => $this->t('Some description of the agreement'),
       '#default_value' => $this->configuration['agreement_description'],
       '#return_value' => TRUE,
     ];

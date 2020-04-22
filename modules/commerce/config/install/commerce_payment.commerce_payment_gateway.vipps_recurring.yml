@@ -3,8 +3,8 @@ status: true
 dependencies:
   module:
     - vipps_recurring_payments_commerce
-id: vipps_recurring
-label: 'Vipps recurring'
+id: vipps_recurring_payments
+label: 'Vipps Recurring Payments'
 weight: null
 plugin: vipps_recurring_checkout
 configuration:
@@ -15,7 +15,7 @@ configuration:
   client_secret: ''
   frequency: monthly
   charge_retry_days: '5'
-  display_label: 'Vipps Recurring Checkout'
+  display_label: 'Vipps fast betalinger'
   mode: test
   collect_billing_information: true
   test_msn: ''

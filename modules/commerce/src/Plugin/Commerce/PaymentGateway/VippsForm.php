@@ -162,30 +162,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
       '#title' => $this->t('Charge frequency'),
       '#required' => true,
       '#default_value' => $this->configuration['frequency'] ?? 'daily',
-      '#description' => $this->t('Define the charges frequency.'),
-      '#options' => [
-        'daily' => t('Daily'),
-        'weekly' => t('Weekly'),
-        'monthly' => t('Monthly'),
-        'yearly' => t('Yearly'),
-      ],
-    ];
-
-    // Test credentials
-    $form['test_env'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Test Environment API'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
-      '#weight' => 11,
-    ];
-
-    $form['test_env']['test_frequency'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Test Charge frequency'),
-      '#required' => true,
-      '#default_value' => $this->configuration['test_frequency'] ?? 'daily',
-      '#description' => $this->t('Define the charges frequency.'),
+      '#description' => $this->t('How often to charge'),
       '#options' => [
         'daily' => t('Daily'),
         'weekly' => t('Weekly'),

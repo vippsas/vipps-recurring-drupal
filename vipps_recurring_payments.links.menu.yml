@@ -5,7 +5,7 @@ system.vipps:
   parent: system.admin_config
 
 vipps_recurring_payments.admin_settings_form:
-  title: 'VIPPS Recurring Payments'
+  title: 'Vipps Recurring Payments'
   route_name: vipps_recurring_payments.settings
   description: 'Configure API keys and settings'
   parent: system.vipps
