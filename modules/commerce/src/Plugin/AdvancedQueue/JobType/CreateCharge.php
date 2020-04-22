@@ -98,7 +98,7 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
 
       try {
         $chargeId = $this->vippsService->createChargeItem(
-          new ChargeItem($agreementId, $agreementNode->getPrice(), 'Recurring charge ' . $agreementNode->getPrice()/100),
+          new ChargeItem($agreementId, $agreementNode->getPrice()*100, 'Recurring charge'),
           $this->httpClient->auth()
         );
       } catch (\Exception $exception) {

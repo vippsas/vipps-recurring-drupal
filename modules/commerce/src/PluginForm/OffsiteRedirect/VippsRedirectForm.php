@@ -108,7 +108,6 @@ class VippsRedirectForm extends BasePaymentOffsiteForm implements ContainerInjec
           '',
           [
             'commerce_order' => $order->id(),
-            'step' => 'payment'
           ]
         )
       );

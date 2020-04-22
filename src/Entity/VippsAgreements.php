@@ -54,12 +54,12 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *     "canonical" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}",
  *     "add-form" = "/admin/config/vipps/vipps-agreements/add",
  *     "edit-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/edit",
- *     "delete-form" = "/admin/config/vipps/vipps-agreements /{vipps_agreements}/delete",
- *     "version-history" = "/admin/config/vipps/vipps-agreements /{vipps_agreements}/revisions",
- *     "revision" = "/admin/config/vipps/vipps-agreements /{vipps_agreements}/revisions/{vipps_agreements_revision}/view",
- *     "revision_revert" = "/admin/config/vipps/vipps-agreements /{vipps_agreements}/revisions/{vipps_agreements_revision}/revert",
- *     "revision_delete" = "/admin/config/vipps/vipps-agreements /{vipps_agreements}/revisions/{vipps_agreements_revision}/delete",
- *     "collection" = "/admin/config/vipps/vipps-agreements ",
+ *     "delete-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/delete",
+ *     "version-history" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions",
+ *     "revision" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/view",
+ *     "revision_revert" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/revert",
+ *     "revision_delete" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/delete",
+ *     "collection" = "/admin/config/vipps/vipps-agreements",
  *   },
  *   field_ui_base_route = "vipps_agreements.settings"
  * )

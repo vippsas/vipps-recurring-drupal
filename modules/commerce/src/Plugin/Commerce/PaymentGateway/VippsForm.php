@@ -360,7 +360,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
       $product_repo = \Drupal::service('vipps_recurring_payments:product_subscription_repository');
       $product = $product_repo->getProduct();
 
-      $product->setDescription(t('Capture ') . $amount->getNumber() . $amount->getCurrencyCode() . t(' for Agreement') . $agreementId);
+      $product->setDescription(t('Capture ') . $amount->getNumber() . t(' for Agreement ') . $agreementId);
       $product->setPrice($amount->getNumber());
 
       $request = $requestStorageFactory->buildCreateChargeData(
@@ -421,7 +421,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     $product_repo = \Drupal::service('vipps_recurring_payments:product_subscription_repository');
     $product = $product_repo->getProduct();
 
-    $product->setDescription(t('Refund ') . $amount->getNumber() . $amount->getCurrencyCode() . t(' for Agreement') . $agreementId);
+    $product->setDescription(t('Refund ') . $amount->getNumber() . t(' for Agreement ') . $agreementId);
     $product->setPrice($amount->getNumber());
 
     $request = $requestStorageFactory->buildCreateChargeData(
@@ -591,7 +591,7 @@ class VippsForm extends OffsitePaymentGatewayBase implements SupportsVoidsInterf
     $agreementNode->setIntervals($this->configuration['frequency'] ?? 'MONTHLY');
     $agreementNode->setAgreementId($agreementId);
     $agreementNode->setMobile('');
-    $agreementNode->setPrice($agreementData->getPrice());
+    $agreementNode->setPrice($agreementData->getPrice()/100);
 
     $agreementNode->save();
     $agreementNodeId = $agreementNode->id();
