@@ -8,21 +8,11 @@ label: 'Vipps Recurring Payments'
 weight: null
 plugin: vipps_recurring_checkout
 configuration:
-  msn: ''
-  access_token: ''
-  subscription_key: ''
-  client_id: ''
-  client_secret: ''
-  frequency: monthly
+  charge_interval: monthly
   charge_retry_days: '5'
   display_label: 'Vipps fast betalinger'
   mode: test
   collect_billing_information: true
-  test_msn: ''
-  test_access_token: ''
-  test_subscription_key: ''
-  test_client_id: ''
-  test_client_secret: ''
-  test_frequency: monthly
+  initial_charge: '1'
 conditions: {  }
 conditionOperator: AND

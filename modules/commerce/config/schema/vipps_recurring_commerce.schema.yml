@@ -16,7 +16,7 @@ commerce_payment.commerce_payment_gateway.plugin.vipps:
     client_secret:
       type: string
       label: "Secret Key"
-    frequency:
+    charge_interval:
       type: string
       label: "Charge frequency"
     charge_retry_days:

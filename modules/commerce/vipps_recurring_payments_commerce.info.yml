@@ -8,4 +8,5 @@ dependencies:
   - commerce
   - commerce_checkout
   - commerce_payment
+  - commerce_recurring
   - advancedqueue

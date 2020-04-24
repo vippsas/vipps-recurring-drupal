@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies: {  }
+id: vipps_recurring
+label: Vipps Recurring
+displayLabel: Vipps Recurring
+billingType: prepaid
+retrySchedule:
+  - 5
+unpaidSubscriptionState: canceled
+plugin: rolling
+configuration:
+  trial_interval: {  }
+  interval:
+    number: 1
+    unit: month
+prorater: full_price
+proraterConfiguration: {  }
