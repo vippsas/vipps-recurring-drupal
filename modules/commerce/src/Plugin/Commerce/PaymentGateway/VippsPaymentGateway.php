@@ -10,6 +10,7 @@ use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsRefundsInterf
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsVoidsInterface;
 use Drupal\commerce_price\Price;
 use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
+use Drupal\vipps_recurring_payments\Form\SettingsForm;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -37,6 +38,18 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
     $payment_method = $payment->getPaymentMethod();
     $this->assertPaymentMethod($payment_method);
     $requestStorageFactory = $this->getRequestStorageFactory();
+
+    /** @var SettingsForm $plugin */
+    $configFactory = $this->configFactory->getEditable(SettingsForm::SETTINGS);
+    $settings = $configFactory->getRawData();
+
+    if($settings['msn'] == '' || $settings['test_msn'] == '') {
+      \Drupal::logger('vipps_recurring_commerce')->error(
+        'There is no Settings for Vipps recurring'
+      );
+      throw new PaymentGatewayException('There is no Settings for Vipps recurring');
+    }
+
 
     $token = $this->httpClient->auth();
 

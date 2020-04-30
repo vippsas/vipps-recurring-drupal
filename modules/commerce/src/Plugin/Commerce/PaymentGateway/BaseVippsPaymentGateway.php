@@ -11,6 +11,7 @@ use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\vipps_recurring_payments\Form\SettingsForm;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
 use Drupal\vipps_recurring_payments\Service\VippsService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -101,6 +102,26 @@ abstract class BaseVippsPaymentGateway extends OnsitePaymentGatewayBase {
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildConfigurationForm($form, $form_state);
+
+    /** @var SettingsForm $plugin */
+    $configFactory = $this->configFactory->getEditable(SettingsForm::SETTINGS);
+    $rowData = $configFactory->getRawData();
+
+    $mode = 'test';
+
+    if(isset($rowData['test_mode'])) {
+      if($rowData['test_mode'] == 1) {
+        $mode = 'test';
+      } else {
+        $mode = 'live';
+      }
+    }
+
+    $form['mode']['#default_value'] = $mode;
+    $form['mode']['#attributes']['readonly'] = 'readonly';
+    $form['mode']['#attributes']['disabled'] = TRUE;
+    $form['mode']['#description'] = t('This setting is set on the main configuration at /admin/config/vipps/vipps-recurring-payments');
+    
     return $form;
   }
 

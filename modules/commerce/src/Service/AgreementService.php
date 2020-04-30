@@ -85,6 +85,9 @@ class AgreementService {
         break;
     }
 
+    $payment->save();
+    $order->save();
+
     if(!$agreementData->isActive()) {
       \Drupal::logger('vipps_recurring_commerce')->error(
         'Order %oid: Agreement %aid has status %as', $message_variables

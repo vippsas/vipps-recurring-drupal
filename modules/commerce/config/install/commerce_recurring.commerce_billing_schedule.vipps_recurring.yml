@@ -1,9 +1,9 @@
 langcode: en
 status: true
 dependencies: {  }
-id: vipps_recurring
-label: Vipps Recurring
-displayLabel: Vipps Recurring
+id: monthly_recurring
+label: Monthly Recurring
+displayLabel: Monthly Recurring
 billingType: prepaid
 retrySchedule:
   - 5

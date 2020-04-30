@@ -22,3 +22,12 @@ function vipps_recurring_payments_commerce_help($route_name, RouteMatchInterface
     default:
   }
 }
+
+/**
+ * Implements hook_form_alter().
+ */
+function vipps_recurring_payments_commerce_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if($form_id == 'commerce_billing_schedule_edit_form' || $form_id == 'commerce_billing_schedule_add_form') {
+    $form['dunning']['#access'] = FALSE;
+  }
+}
