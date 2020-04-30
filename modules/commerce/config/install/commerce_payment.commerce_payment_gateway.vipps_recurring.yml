@@ -8,8 +8,6 @@ label: 'Vipps Recurring Payments'
 weight: null
 plugin: vipps_recurring_checkout
 configuration:
-  charge_interval: monthly
-  charge_retry_days: '5'
   display_label: 'Vipps fast betalinger'
   mode: test
   collect_billing_information: true

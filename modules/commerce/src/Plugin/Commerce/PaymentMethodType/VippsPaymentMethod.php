@@ -36,12 +36,12 @@ class VippsPaymentMethod extends PaymentMethodTypeBase {
       ->setRequired(TRUE);
 
     $fields['agreement_title'] = BundleFieldDefinition::create('string')
-      ->setLabel(t('Agreement title'))
+      ->setLabel(t('Product name'))
       ->setDescription(t('Product title'))
       ->setRequired(TRUE);
 
     $fields['agreement_description'] = BundleFieldDefinition::create('string')
-      ->setLabel(t('Agreement description'))
+      ->setLabel(t('Product description'))
       ->setDescription(t('Product description'))
       ->setRequired(TRUE);
 

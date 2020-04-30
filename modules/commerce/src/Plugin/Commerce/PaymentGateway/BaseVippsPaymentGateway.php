@@ -4,10 +4,81 @@
 namespace Drupal\vipps_recurring_payments_commerce\Plugin\Commerce\PaymentGateway;
 
 
+use Drupal\commerce_payment\PaymentMethodTypeManager;
+use Drupal\commerce_payment\PaymentTypeManager;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OnsitePaymentGatewayBase;
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
+use Drupal\vipps_recurring_payments\Service\VippsService;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class BaseVippsPaymentGateway extends OnsitePaymentGatewayBase {
+
+  /**
+   * @var \Drupal\vipps_recurring_payments\Service\VippsHttpClient
+   */
+  protected $httpClient;
+
+  /**
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * @var \Drupal\vipps_recurring_payments\Service\VippsService
+   */
+  protected $vippsService;
+
+  /**
+   * BaseVippsPaymentGateway constructor.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\commerce_payment\PaymentTypeManager $payment_type_manager
+   *   The payment type manager.
+   * @param \Drupal\commerce_payment\PaymentMethodTypeManager $payment_method_type_manager
+   *   The payment method type manager.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time.
+   * @param VippsHttpClient $httpClient
+   * @param ConfigFactoryInterface $configFactory
+   * @param VippsService $vippsService
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, PaymentTypeManager $payment_type_manager, PaymentMethodTypeManager $payment_method_type_manager, TimeInterface $time, VippsHttpClient $httpClient, ConfigFactoryInterface $configFactory, VippsService $vippsService) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $payment_type_manager, $payment_method_type_manager, $time);
+    $this->httpClient = $httpClient;
+    $this->configFactory = $configFactory;
+    $this->vippsService = $vippsService;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager'),
+      $container->get('plugin.manager.commerce_payment_type'),
+      $container->get('plugin.manager.commerce_payment_method_type'),
+      $container->get('datetime.time'),
+      $container->get('vipps_recurring_payments:http_client'),
+      $container->get('config.factory'),
+      $container->get('vipps_recurring_payments:vipps_service')
+    );
+  }
+
+
 
   /**
    * {@inheritdoc}
@@ -21,7 +92,6 @@ abstract class BaseVippsPaymentGateway extends OnsitePaymentGatewayBase {
         'subscription_key' => $config->get('subscription_key'),
         'client_id' => $config->get('client_id'),
         'client_secret' => $config->get('client_secret'),
-        'charge_interval' => '',
         'charge_retry_days' => $config->get('charge_retry_days'),
       ] + parent::defaultConfiguration();
   }
@@ -31,21 +101,6 @@ abstract class BaseVippsPaymentGateway extends OnsitePaymentGatewayBase {
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildConfigurationForm($form, $form_state);
-
-    $form['charge_interval'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Charge frequency'),
-      '#required' => true,
-      '#default_value' => $this->configuration['charge_interval'] ?? 'monthly',
-      '#description' => $this->t('How often to charge'),
-      '#options' => [
-        'daily' => t('Daily'),
-        'weekly' => t('Weekly'),
-        'monthly' => t('Monthly'),
-        'yearly' => t('Yearly'),
-      ],
-    ];
-
     return $form;
   }
 
@@ -58,20 +113,6 @@ abstract class BaseVippsPaymentGateway extends OnsitePaymentGatewayBase {
       $values = $form_state->getValue($form['#parents']);
       $this->configuration['charge_interval'] = $values['charge_interval'];
     }
-  }
-
-  /**
-   * Gets the Vipps service.
-   */
-  protected function getVippsService() {
-    return \Drupal::service('vipps_recurring_payments:vipps_service');
-  }
-
-  /**
-   * Gets the Vipps service.
-   */
-  protected function getVippsHttpClient() {
-    return \Drupal::service('vipps_recurring_payments:http_client');
   }
 
   /**

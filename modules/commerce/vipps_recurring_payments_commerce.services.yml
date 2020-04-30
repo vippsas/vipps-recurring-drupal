@@ -1,0 +1,8 @@
+services:
+  vipps_recurring_payments_recurring:agreement_service:
+    class: Drupal\vipps_recurring_payments_commerce\Service\AgreementService
+    arguments:
+      - '@vipps_recurring_payments:http_client'
+      - '@logger.factory'
+      - '@vipps_recurring_payments:delay_manager'
+      - '@module_handler'
