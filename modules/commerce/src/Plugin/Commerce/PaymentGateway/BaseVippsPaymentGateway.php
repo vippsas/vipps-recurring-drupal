@@ -121,7 +121,7 @@ abstract class BaseVippsPaymentGateway extends OnsitePaymentGatewayBase {
     $form['mode']['#attributes']['readonly'] = 'readonly';
     $form['mode']['#attributes']['disabled'] = TRUE;
     $form['mode']['#description'] = t('This setting is set on the main configuration at /admin/config/vipps/vipps-recurring-payments');
-    
+
     return $form;
   }
 

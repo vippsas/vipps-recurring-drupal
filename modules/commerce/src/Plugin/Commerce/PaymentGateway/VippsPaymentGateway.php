@@ -66,6 +66,7 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
       $billing_schedule = $purchased_entity->get('billing_schedule')->entity;
       $initial_charge = $billing_schedule->getBillingType() == 'prepaid' ?? 'false';
       $frequency = $billing_schedule->getPluginConfiguration()["interval"]["unit"] . 'ly';
+      $frequency = $frequency == 'dayly' ? 'daily' : $frequency;
     }
 
     if(!isset($billing_schedule)) {
@@ -75,9 +76,9 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
       throw new PaymentGatewayException('There is no Billing schedule defined for this order');
     }
 
-    if(!isset($initial_charge) || in_array($initial_charge, ['hourly'])) {
+    if(!isset($frequency) || in_array($frequency, ['hourly'])) {
       \Drupal::logger('vipps_recurring_commerce')->error(
-        'Order %oid: unsupported schedule frequency %fre', ['%oid' => $order->id(), '%fre' => $initial_charge]
+        'Order %oid: unsupported schedule frequency %fre', ['%oid' => $order->id(), '%fre' => $frequency]
       );
       throw new PaymentGatewayException('Unsupported schedule frequency');
     }

@@ -106,6 +106,7 @@ class AgreementService {
       $billing_schedule = $purchased_entity->get('billing_schedule')->entity;
       $initial_charge = $billing_schedule->getBillingType() == 'prepaid' ?? 'false';
       $frequency = $billing_schedule->getPluginConfiguration()["interval"]["unit"] . 'ly';
+      $frequency = $frequency == 'dayly' ? 'daily' : $frequency;
     }
 
     $payment_method = $payment->getPaymentMethod();
