@@ -161,11 +161,11 @@ class AgreementService {
     $product->setPrice($agreementData->getPrice());
 
     $job = Job::create('create_charge_job_commerce', [
-      'orderId' => $agreementId,
-      'agreementNodeId' => $agreementNodeId
+      'orderId' => $order->id(),
+      'agreementId' => $agreementId
     ]);
 
-    $queue = Queue::load('vipps_recurring_payments');
+    $queue = Queue::load('commerce_recurring');
     $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($product));
 
     $message_variables['%aid'] = $agreementId;
