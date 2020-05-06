@@ -75,7 +75,7 @@ class VippsHttpClient {
     return $responseData->chargeId;
   }
 
-  public function getRetrieveAgreement(string $token, string $agreementId):AgreementData {
+  public function getRetrieveAgreement(string $token, string $agreementId):array {
     $response = $this->httpClient->request('GET', $this->config->getRetrieveAgreementUrl($agreementId), [
       'headers' => [
         'Authorization' => "Bearer {$token}",
@@ -83,9 +83,7 @@ class VippsHttpClient {
       ],
     ]);
 
-    $responseData = $this->getResponseBody($response);
-
-    return new AgreementData($responseData->id, $responseData->status, $responseData->price);
+    return (array) $this->getResponseBody($response);
   }
 
   public function getCharge(string $token, string $agreementId, string $chargeId):ChargeItemResponse{
