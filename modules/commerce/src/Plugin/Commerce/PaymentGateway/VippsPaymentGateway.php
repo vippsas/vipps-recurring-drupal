@@ -52,8 +52,8 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
 
 
     $token = $this->httpClient->auth();
-
     $order = $payment->getOrder();
+    $title = ' ';
 
     // Can be considered an initial subscription order if it has at least one
     // product which has subscription enabled.
@@ -67,6 +67,7 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
       $initial_charge = $billing_schedule->getBillingType() == 'prepaid' ?? 'false';
       $frequency = $billing_schedule->getPluginConfiguration()["interval"]["unit"] . 'ly';
       $frequency = $frequency == 'dayly' ? 'daily' : $frequency;
+      $title = $purchased_entity->getTitle();
     }
 
     if(!isset($billing_schedule)) {
@@ -95,8 +96,8 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
     $product = new VippsProductSubscription(
       $intervals['base_interval'],
       intval($intervals['base_interval_count']),
-      $payment_method->agreement_title->value,
-      $payment_method->agreement_description->value,
+      $title,
+      $title,
       $initial_charge
     );
     $product->setPrice($order->total_price->getValue()[0]['number']);

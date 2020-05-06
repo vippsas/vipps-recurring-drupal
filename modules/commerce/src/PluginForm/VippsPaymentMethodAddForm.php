@@ -33,24 +33,6 @@ class VippsPaymentMethodAddForm extends BasePaymentMethodAddForm implements Cont
       '#size' => 20,
     ];
 
-    $element['agreement_title'] = [
-      '#type' => 'textfield',
-      '#title' => t('Agreement Title'),
-      '#attributes' => ['autocomplete' => 'off'],
-      '#required' => TRUE,
-      '#maxlength' => 45,
-      '#size' => 60,
-    ];
-
-    $element['agreement_description'] = [
-      '#type' => 'textarea',
-      '#title' => t('Agreement Description'),
-      '#attributes' => ['autocomplete' => 'off'],
-      '#required' => TRUE,
-      '#maxlength' => 100,
-      '#size' => 60,
-    ];
-
     return $element;
   }
 }
