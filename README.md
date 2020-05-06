@@ -1,5 +1,73 @@
 # Vipps recurring payments
 
+
+### Basic authentication
+In order to be able to send API requests to the module, you need to activate `Basic auth` module which is a part of the core and use Basic auth with all your api calls:
+```json
+{
+  "Content-type": "application/json",
+  "Authorization": "Basic ZnJvbnRrb206R29vZCBsdWNrIHRyeWluZw=="
+
+}
+```
+
+### Test auth
+* Endpoint: `/vipps-recurring-payments/test/auth`
+* Method: `GET`
+* Content-Type: `application/json`
+* Response example:
+```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NSWSIsImtpZCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NSWSJ9.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9lNTExNjUyNi01MWRjLTRjMTQtYjA4Ni1hNWNiNDcxNmJjNGIvIiwiaWF0IjoxNTg4NzcwNDA1LCJuYmYiOjE1ODg3NzA0MDUsImV4cCI6MTU4ODc3NDMwNSwiYWlvIjoiNDJkZ1lHalhYemc3UE8wcXI4QzNCV2M2cjZmYkF3QT0iLCJhcHBpZCI6IjllZjEyNjA1LTNiYzYtNDk5Yi1iZjU0LTI4Mzc4ZTQyM2I3YSIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0L2U1MTE2NTI2LTUxZGMtNGMxNC1iMDg2LWE1Y2I0NzE2YmM0Yi8iLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiRVUiLCJ0aWQiOiJlNTExNjUyNi01MWRjLTRjMTQtYjA4Ni1hNWNiNDcxNmJjNGIiLCJ1dGkiOiJMSHRnWmFQOFhrLWtMTUV2Zlg1TkFBIiwidmVyIjoiMS4wIn0.PqdB33eWX90tRWYjNhCY6TeTMdC4DMbMYasfIBapdOUTgC8lhhWMImGlOK-dbEEsJ1gRrkGVFgqaqcdbiNPfUgJAcQPl2FZj1iMxwaKq6i_I7cHEfs8sHxpZ50lYjFjXtOkecZ2N62AdA6ltE_tWdtmaVRksiTfveaViSpjQLjnvZYUIb4WYomG7IzFcof_QV2ZbxNlh6fEYMT-D-2HEoEzq2i2eH2lpu-bsJAxLpUBdgE2dvt9fmbDRAb1uzNY_ouNDfml9LXo8GINB_KUaahouXmP1itW7mZW1FXImICkLVXWDlTi3NT31jv-L4NhbwPbZDsmv1ggCa-rcbLpK_g
+```
+
+### Get status of an agreement:
+* Endpoint: `/vipps-recurring-payments/agreement/get`
+* Method: `POST`
+* Content-Type: `application/json`
+* Request content example:
+```json
+"agr_UVUFcx31"
+```
+* Response example:
+```json
+{
+    "id": "agr_CUfJvfx",
+    "start": "2020-02-06T10:10:07Z",
+    "stop": null,
+    "status": "ACTIVE",
+    "productName": "Vipps product",
+    "price": 87600,
+    "productDescription": "Testing Vipps recurring payment",
+    "interval": "MONTH",
+    "intervalCount": 1,
+    "currency": "NOK",
+    "campaign": null
+}
+```
+
+### Cancell an agreement:
+* Endpoint: `/vipps-recurring-payments/agreement/cancel`
+* Method: `PATCH`
+* Content-Type: `application/json`
+* Request content example:
+```json
+[
+  "agr_UVUFcx31",
+  "agr_CUfJvfx"
+]
+```
+* Response example:
+```json
+{
+    "successes": [
+        "agr_UVUFcx31"
+    ],
+    "errors": [
+      "agr_CUfJvfx: Client error: `PATCH https://apitest.vipps.no/recurring/v2/agreements/agr_CUfJvfx` resulted in a `400 Bad Request` response:\n[{\"field\":\"status\",\"message\":\"Missing message for error: status.notActive\",\"code\":\"status.notActive\",\"contextId\":\"a47463 (truncated...)\n"
+    ]
+}
+```
+
 ### Make charges:
 * Endpoint: `/vipps-recurring-payments/charge/make`
 * Method: `POST`
@@ -57,5 +125,55 @@
     "errors": [
         "agr_UVUFcx3: Client error: `GET https://apitest.vipps.no/recurring/v2/agreements/agr_knvVufdj/charges` resulted in a `400 Bad Request` response:\n[{\"field\":\"agreementId\",\"message\":\"Missing message for error: invalid.agreementId\",\"code\":\"invalid.agreementId\",\"context (truncated...)\n"
     ]
+}
+```
+
+### Cancel charges for an agreement:
+* Endpoint: `/vipps-recurring-payments/charge/cancel`
+* Method: `DELETE`
+* Content-Type: `application/json`
+* Request content example:
+```json
+[
+	{
+		"agreement_id": "agr_CUfJvfx",
+		"price": 123,
+    	"description": "This is description",
+    	"charge_id": "chr_ptqHYWG"
+	}
+]
+```
+* Response example:
+```json
+{
+    "successes": [
+        "chr_ptqHYWG"
+    ],
+    "errors": []
+}
+```
+
+### Cancel charges for an agreement:
+* Endpoint: `/vipps-recurring-payments/charge/refund`
+* Method: `POST`
+* Content-Type: `application/json`
+* Request content example:
+```json
+[
+	{
+		"agreement_id": "agr_CUfJvfx",
+		"price": 123,
+    	"description": "This is description",
+    	"charge_id": "chr_ptqHYWG"
+	}
+]
+```
+* Response example:
+```json
+{
+    "successes": [
+        "chr_ptqHYWG"
+    ],
+    "errors": []
 }
 ```
