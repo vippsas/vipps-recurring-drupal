@@ -95,6 +95,8 @@ class AgreementService {
       return;
     }
 
+    $title = ' ';
+
     // Can be considered an initial subscription order if it has at least one
     // product which has subscription enabled.
     foreach ($order->getItems() as $order_item) {
@@ -107,6 +109,7 @@ class AgreementService {
       $initial_charge = $billing_schedule->getBillingType() == 'prepaid' ?? 'false';
       $frequency = $billing_schedule->getPluginConfiguration()["interval"]["unit"] . 'ly';
       $frequency = $frequency == 'dayly' ? 'daily' : $frequency;
+      $title = $purchased_entity->getTitle();
     }
 
     $payment_method = $payment->getPaymentMethod();
@@ -154,14 +157,15 @@ class AgreementService {
     $product = new VippsProductSubscription(
       $intervals['base_interval'],
       intval($intervals['base_interval_count']),
-      $payment_method->agreement_title->value,
-      $payment_method->agreement_description->value,
+      $title,
+      $title,
       $initial_charge
     );
     $product->setPrice($agreementData->getPrice());
 
     $job = Job::create('create_charge_job_commerce', [
-      'orderId' => $agreementId,
+      'orderId' => $order->id(),
+      'agreementId' => $agreementId,
       'agreementNodeId' => $agreementNodeId
     ]);
 

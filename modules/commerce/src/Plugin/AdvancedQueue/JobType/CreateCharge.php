@@ -86,10 +86,9 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
    */
   public function process(Job $job) {
     try {
-
       $payload = $job->getPayload();
 
-      $agreementId = $payload['orderId'];
+      $agreementId = $payload['agreementId'];
       $agreementNodeId = $payload['agreementNodeId'];
       $agreementNode = VippsAgreements::load($agreementNodeId);
       $agreementNode->getPrice();

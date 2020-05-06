@@ -35,16 +35,6 @@ class VippsPaymentMethod extends PaymentMethodTypeBase {
       ->setDescription(t('The Vipps hone Number'))
       ->setRequired(TRUE);
 
-    $fields['agreement_title'] = BundleFieldDefinition::create('string')
-      ->setLabel(t('Product name'))
-      ->setDescription(t('Product title'))
-      ->setRequired(TRUE);
-
-    $fields['agreement_description'] = BundleFieldDefinition::create('string')
-      ->setLabel(t('Product description'))
-      ->setDescription(t('Product description'))
-      ->setRequired(TRUE);
-
     return $fields;
   }
 }
