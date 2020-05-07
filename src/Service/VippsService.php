@@ -144,7 +144,7 @@ class VippsService
     $token = $this->httpClient->auth();
 
     try {
-      $response = $this->httpClient->getRetrieveAgreement($token, $agreementId);
+      $response = $this->httpClient->getRetrieveAgreement($token, $agreementId)->toArray();
     } catch (\Throwable $e) {
        $response = new ResponseErrorItem($agreementId, $e->getMessage());
     }

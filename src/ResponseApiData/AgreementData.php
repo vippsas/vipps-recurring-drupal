@@ -17,14 +17,17 @@ class AgreementData
 
   private $price;
 
-  public function __construct(string $id, string $status, int $price)
+  private $response;
+
+  public function __construct(\stdClass $response)
   {
-    if(!$this->statusValid($status)) {
+    if(!$this->statusValid($response->status)) {
       throw new \DomainException('Unsupported status');
     }
-    $this->id = $id;
-    $this->status = $status;
-    $this->price = $price;
+    $this->id = $response->id;
+    $this->response = $response;
+    $this->status = $response->status;
+    $this->price = $response->price;
   }
 
   public function getStatuses():array {
@@ -49,5 +52,9 @@ class AgreementData
 
   public function isActive():bool {
     return ($this->status === self::ACTIVE);
+  }
+
+  public function toArray():array {
+    return (array) $this->response;
   }
 }
