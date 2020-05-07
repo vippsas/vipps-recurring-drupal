@@ -37,7 +37,7 @@ vipps_recurring_payments.make_charges:
 
 vipps_recurring_payments.cancel_charges:
   path: '/vipps-recurring-payments/charge/cancel'
-  methods: [DELETE]
+  methods: [POST]
   defaults:
     _controller: Drupal\vipps_recurring_payments\Controller\ChargeController:cancel
   options:
@@ -81,7 +81,7 @@ vipps_recurring_payments.get_agreement:
 
 vipps_recurring_payments.cancel_agreement:
   path: '/vipps-recurring-payments/agreement/cancel'
-  methods: [PATCH]
+  methods: [POST]
   defaults:
     _controller: Drupal\vipps_recurring_payments\Controller\AgreementController:cancel
   options:

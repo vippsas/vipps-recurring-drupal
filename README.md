@@ -47,7 +47,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
 
 ### Cancell an agreement:
 * Endpoint: `/vipps-recurring-payments/agreement/cancel`
-* Method: `PATCH`
+* Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
 ```json
@@ -130,7 +130,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
 
 ### Cancel charges for an agreement:
 * Endpoint: `/vipps-recurring-payments/charge/cancel`
-* Method: `DELETE`
+* Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
 ```json
