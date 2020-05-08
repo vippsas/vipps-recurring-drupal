@@ -2,6 +2,7 @@
 
 namespace Drupal\vipps_recurring_payments_commerce\Service;
 
+use DateTime;
 use Drupal\advancedqueue\Entity\Queue;
 use Drupal\advancedqueue\Job;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -113,6 +114,7 @@ class AgreementService {
     }
 
     $payment_method = $payment->getPaymentMethod();
+    $date = strtotime("now");
 
     /**
      * Create a Node of vipps_agreement type
@@ -126,6 +128,9 @@ class AgreementService {
     $agreementNode->setAgreementId($agreementId);
     $agreementNode->setMobile($payment_method->phone_number->value);
     $agreementNode->setPrice($agreementData->getPrice()/100);
+    $agreementNode->setCreatedTime($date);
+    $agreementNode->setChangedTime($date);
+    $agreementNode->setOwnerId(\Drupal::currentUser()->id());
 
     $agreementNode->save();
     $agreementNodeId = $agreementNode->id();

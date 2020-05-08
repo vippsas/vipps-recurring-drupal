@@ -9,6 +9,8 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\user\EntityOwnerInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Defines the Vipps agreements entity.
@@ -43,6 +45,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "revision" = "vid",
+ *     "uid" = "uid",
  *     "agreement_id" = "agreement_id",
  *     "label" = "mobile",
  *     "agreement_status" = "agreement_status",
@@ -184,6 +187,36 @@ class VippsAgreements extends EditorialContentEntityBase implements VippsAgreeme
   }
 
   /**
+   * @inheritDoc
+   */
+  public function getOwner() {
+    return $this->get('uid')->entity;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setOwner(UserInterface $account) {
+    $this->set('uid', $account->id());
+    return $this;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getOwnerId() {
+    return $this->getEntityKey('owner');
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setOwnerId($uid) {
+    $this->set('uid', $uid);
+    return $this;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
@@ -191,6 +224,19 @@ class VippsAgreements extends EditorialContentEntityBase implements VippsAgreeme
 
     // Add the published field.
     $fields += static::publishedBaseFieldDefinitions($entity_type);
+
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Owner'))
+      ->setDescription(t('The agreement owner.'))
+      ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'default')
+      ->setDefaultValueCallback('Drupal\vipps_recurring_payments\Entity\VippsAgreements::getCurrentUserId')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'author',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['agreement_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Agreement ID'))
@@ -318,4 +364,15 @@ class VippsAgreements extends EditorialContentEntityBase implements VippsAgreeme
     return $fields;
   }
 
+  /**
+   * Default value callback for 'uid' base field definition.
+   *
+   * @see ::baseFieldDefinitions()
+   *
+   * @return array
+   *   An array of default values.
+   */
+  public static function getCurrentUserId() {
+    return [\Drupal::currentUser()->id()];
+  }
 }

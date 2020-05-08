@@ -1,0 +1,4 @@
+vipps_recurring_payments_commerce.user_agreement_list:
+  route_name: vipps_recurring_payments_commerce.user_agreement_list
+  base_route: entity.user.canonical
+  title: 'Vipps Agreements'

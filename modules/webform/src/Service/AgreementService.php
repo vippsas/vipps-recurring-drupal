@@ -78,6 +78,7 @@ class AgreementService
     $handlers = $webform->getHandlers();
     $handlerConfig = $handlers->getConfiguration();
     $configurations = $handlerConfig['vipps_agreement_handler'];
+    $date = strtotime("now");
 
     /**
      * Create a Node of vipps_agreement type
@@ -91,6 +92,9 @@ class AgreementService
     $agreementNode->setAgreementId($submission->getElementData('agreement_id'));
     $agreementNode->setMobile($submission->getElementData('phone'));
     $agreementNode->setPrice($agreementData->getPrice());
+    $agreementNode->setCreatedTime($date);
+    $agreementNode->setChangedTime($date);
+    $agreementNode->setOwnerId(\Drupal::currentUser()->id());
 
     $agreementNode->save();
     $agreementNodeId = $agreementNode->id();
