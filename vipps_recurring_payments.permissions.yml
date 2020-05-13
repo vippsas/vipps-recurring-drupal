@@ -15,6 +15,9 @@ edit vipps agreements entities:
 view published vipps agreements entities:
   title: 'View published Vipps agreements entities'
 
+manage own vipps agreements entities:
+  title: 'Manage own Vipps agreements entities'
+
 view unpublished vipps agreements entities:
   title: 'View unpublished Vipps agreements entities'
 

@@ -3,6 +3,7 @@
 namespace Drupal\vipps_recurring_payments_commerce\Plugin\AdvancedQueue\JobType;
 
 use Drupal\advancedqueue\Annotation\AdvancedQueueJobType;
+use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_payment\Entity\Payment;
 use Drupal\Core\Annotation\Translation;
 use Drupal\vipps_recurring_payments\Service\DelayManager;
@@ -33,8 +34,6 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
   private $product;
 
   private $vippsService;
-
-  private $submissionRepository;
 
   private $httpClient;
 
@@ -92,12 +91,59 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
       $agreementNodeId = $payload['agreementNodeId'];
       $agreementNode = VippsAgreements::load($agreementNodeId);
       $agreementNode->getPrice();
+      $order_id = $payload['order_id'];
+
+      $order = Order::load($order_id);
 
       $message_variables = ['%aid' => $agreementId];
 
       try {
+        $agreementIsActive = $this->vippsService->agreementActive($agreementId);
+      } catch (\Exception $exception) {
+        $message_variables['%m'] = $exception->getMessage();
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          'Agreement %aid: Problem getting the agreement status. Message: %m',
+          $message_variables
+        );
+        throw new \Exception($exception->getMessage());
+      }
+
+      if(!$agreementIsActive) {
+        \Drupal::logger('vipps_recurring_commerce')->error(
+          'Agreement %aid: The agreement it not ACTIVE',
+          $message_variables
+        );
+        return JobResult::failure('The agreement it not ACTIVE');
+      }
+
+      $order_items = [];
+
+      foreach ($order->getItems() as $key => $order_item) {
+        $order_items[] = $order_item;
+        $product_variation = $order_item->getPurchasedEntity();
+        $title = $product_variation->getTitle();
+      }
+
+      /** @var \Drupal\commerce_payment\Entity\PaymentInterface $payment */
+      $payment = Payment::create([
+        'payment_gateway' => $order->get('payment_gateway')->first()->entity->id(),
+        'order_id' => $order->id(),
+        'amount' => $agreementNode->getPrice()*100,
+        'state' => 'new',
+        'payment_method' => $order->get('payment_method')->first()->entity->id(),
+      ]);
+      $payment->save();
+
+      \Drupal::logger('vipps_recurring_commerce')->info(
+        'Order %oid: Payment %pid.', [
+          '%oid' => $order->id(),
+          '%pid' => $payment->id(),
+        ]
+      );
+
+      try {
         $chargeId = $this->vippsService->createChargeItem(
-          new ChargeItem($agreementId, $agreementNode->getPrice()*100, 'Recurring charge'),
+          new ChargeItem($agreementId, $agreementNode->getPrice()*100, $title, $order->id()),
           $this->httpClient->auth()
         );
       } catch (\Exception $exception) {
@@ -108,6 +154,12 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
         );
         throw new \Exception($exception->getMessage());
       }
+
+      $payment->setState('completed');
+      $order->getState()->applyTransitionById('place');
+
+      $payment->save();
+      $order->save();
 
       $message_variables['%cid'] = $chargeId;
 
@@ -136,51 +188,32 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
         $chargeNode->setDescription($charge->getDescription());
         $chargeNode->save();
 
+        // Create a new order
+        $order = \Drupal\commerce_order\Entity\Order::create([
+          'type' => 'recurring',
+          'state' => 'draft',
+          'mail' => $order->getEmail(),
+          'uid' => $order->getCustomerId(),
+          'ip_address' => $order->getIpAddress(),
+          'billing_profile' => $order->getBillingProfile(),
+          'store_id' => $order->getStoreId(),
+          'order_items' => [$order_items],
+          'placed' => time(),
+          'payment_gatewat' => $order->get('payment_gateway')->first()->entity->id(),
+        ]);
+        $order->save();
+        $order->setOrderNumber($order->id());
+        $order->save();
+
         // Add new job to queue for the next charge
         $job = Job::create('create_charge_job_commerce', [
-          'orderId' => $agreementId,
+          'orderId' => $order->id(),
+          'agreementId' => $agreementId,
           'agreementNodeId' => $agreementNodeId
         ]);
+
         $queue = Queue::load('vipps_recurring_payments');
-        $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($this->product));
-
-        try {
-          // Get charges
-          $charges = $this->httpClient->getCharges($this->httpClient->auth(), $agreementId);
-        } catch (\Exception $exception) {
-          $message_variables['%m'] = $exception->getMessage();
-          \Drupal::logger('vipps_recurring_commerce')->error(
-            'Agreement %aid: Problem getting charges. Message: %m',
-            $message_variables
-          );
-          throw new \Exception($exception->getMessage());
-        }
-
-        //Get first charge
-        $first_charge = $charges[0];
-
-        // Get payment associated to charge
-        /** @var \Drupal\commerce_payment\Entity\PaymentInterface $payment */
-        $payment = \Drupal::entityTypeManager()
-          ->getStorage('commerce_payment')
-          ->loadByRemoteId($first_charge->id);
-
-        $order = $payment->getOrder();
-
-        $payment_new = Payment::create([
-          'payment_gateway' => $payment->getPaymentGateway()->id(),
-          'order_id' => $order->id(),
-          'amount' => $charge->getAmount(),
-          'state' => 'completed',
-        ]);
-        $payment_new->save();
-
-        \Drupal::logger('vipps_recurring_commerce')->info(
-          'Order %oid: Payment %pid.', [
-            '%oid' => $order->id(),
-            '%pid' => $payment_new->id(),
-          ]
-        );
+        $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($product));
 
         $this->logger->info(
           sprintf("Charge for %s has been done successfully", $agreementId)

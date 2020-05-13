@@ -22,12 +22,15 @@ class VippsProductSubscription implements ProductSubscriptionInterface
 
   private $initialCharge;
 
+  private $orderId;
+
   public function __construct(
     string $baseInterval = 'MONTH',
     int $baseIntervalCount = 1,
     string $title = '',
     string $description = '',
-    bool $initialCharge = true
+    bool $initialCharge = true,
+    string $oderId = ''
   )
   {
     $this->setIntervalValue($baseInterval);
@@ -35,6 +38,7 @@ class VippsProductSubscription implements ProductSubscriptionInterface
     $this->setDescription($description);
     $this->setTitle($title);
     $this->setInitialCharge($initialCharge);
+    $this->setOrderId($oderId);
   }
 
   public function getId(): int
@@ -131,5 +135,15 @@ class VippsProductSubscription implements ProductSubscriptionInterface
   public function getInitialCharge(): bool
   {
     return $this->initialCharge;
+  }
+
+  public function setOrderId(string $orderId): void
+  {
+    $this->orderId = $orderId;
+  }
+
+  public function getOrderId(): string
+  {
+    return $this->orderId;
   }
 }

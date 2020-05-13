@@ -23,8 +23,7 @@ class CreateChargeData implements RequestStorageInterface {
   }
 
   public function getData(): array {
-
-    return [
+    $data = [
       "amount" => $this->product->getIntegerPrice(),
       "currency" => $this->product->getCurrency(),
       "description" => $this->product->getDescription(),
@@ -32,6 +31,12 @@ class CreateChargeData implements RequestStorageInterface {
       "hasPriceChanged" => false,
       "retryDays" => $this->retryDays
     ];
+
+    if($this->product->getOrderId()) {
+      $data["orderId"] = $this->product->getOrderId();
+    }
+
+    return $data;
   }
 
 }

@@ -41,4 +41,8 @@ class ChargeItem
   public function hasDescription():bool {
     return !is_null($this->description);
   }
+
+  public function hasChargeId():bool {
+    return !is_null($this->chargeId);
+  }
 }

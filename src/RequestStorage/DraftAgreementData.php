@@ -62,6 +62,9 @@ class DraftAgreementData implements RequestStorageInterface {
           "transactionType" => "DIRECT_CAPTURE"
         ],
       ]);
+      if($this->product->getOrderId()) {
+        $data["initialCharge"]['orderId'] = $this->product->getOrderId();
+      }
     }
 
     return $data;

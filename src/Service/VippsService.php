@@ -110,36 +110,6 @@ class VippsService
     return $response;
   }
 
-  /*public function refundCharges(string $agreementId, $amount):CreateChargesResponse {
-    $token = $this->httpClient->auth();
-
-    $response = new CreateChargesResponse();
-
-    $charges = $this->httpClient->getCharges($token, $agreementId);
-
-    foreach ($charges as $charge) {
-      try {
-        $product = $this->productSubscriptionRepository->getProduct();
-        $product->setPrice((float)$amount);
-        $product->setDescription($charge->description);
-        $request = $this->requestStorageFactory->buildCreateChargeData(
-          $product,
-          new \DateTime()
-        );
-
-        $refundResponse = $this->httpClient->refundCharge($token, $agreementId, $charge->id, $request);
-        if ($refundResponse['status'] == 200 ) {
-          $response->addSuccessCharge($charge->id);
-        } else {
-          $response->addError(new ResponseErrorItem($charge->id, \GuzzleHttp\json_encode($refundResponse)));
-        }
-      } catch (\Throwable $e) {
-        $response->addError(new ResponseErrorItem($charge->id, $e->getMessage()));
-      }
-    }
-    return $response;
-  }*/
-
   public function getAgreement(string $agreementId) {
     $token = $this->httpClient->auth();
 
@@ -182,6 +152,10 @@ class VippsService
 
     if($chargeItem->hasDescription()) {
       $product->setDescription($chargeItem->getDescription());
+    }
+
+    if($chargeItem->hasChargeId()) {
+      $product->setOrderId($chargeItem->getChargeId());
     }
 
     $request = $this->requestStorageFactory->buildCreateChargeData(

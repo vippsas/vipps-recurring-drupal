@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * Contains vipps_recurring_payments.install.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_install().
+ */
+function vipps_recurring_payments_install() {
+  // Allow authenticated users to manage own payment methods.
+  user_role_grant_permissions(AccountInterface::AUTHENTICATED_ROLE, ['manage own vipps agreements entities']);
+}
+
+/**
+ * Update entity keys for payment methods.
+ */
+function vipps_recurring_payments_update_8203() {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $uid_storage_definition = $definition_update_manager->getFieldStorageDefinition('uid', 'vipps_recurring_payments');
+  $entity_type = $definition_update_manager->getEntityType('vipps_recurring_payments');
+  $keys = $entity_type->getKeys();
+  $keys['uid'] = 'uid';
+  $entity_type->set('entity_keys', $keys);
+  $definition_update_manager->updateEntityType($entity_type);
+  $definition_update_manager->updateFieldStorageDefinition($uid_storage_definition);
+}
