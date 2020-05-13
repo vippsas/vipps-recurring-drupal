@@ -53,6 +53,8 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
 
     $token = $this->httpClient->auth();
     $order = $payment->getOrder();
+    $order->setOrderNumber($order->id());
+    $order->save();
     $title = ' ';
 
     // Can be considered an initial subscription order if it has at least one
@@ -88,8 +90,6 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
       $order->setData('vipps_auth_key', $token);
     }
 
-    $order->setData('vipps_current_transaction', $payment->getRemoteId());
-
     $intervalService = \Drupal::service('vipps_recurring_payments:charge_intervals');
     $intervals = $intervalService->getIntervals($frequency);
 
@@ -98,10 +98,10 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
       intval($intervals['base_interval_count']),
       $title,
       $title,
-      $initial_charge
+      $initial_charge,
+      $order->id()
     );
     $product->setPrice($order->total_price->getValue()[0]['number']);
-    $payment->save();
 
     try {
       $draftAgreementResponse = $this->httpClient->draftAgreement(
@@ -122,19 +122,7 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
       throw new PaymentGatewayException($exception->getMessage());
     }
 
-    try {
-      $charges = $this->httpClient->getCharges(
-        $this->httpClient->auth(),
-        $draftAgreementResponse->getAgreementId()
-      );
-    } catch (\Exception $exception) {
-      \Drupal::logger('vipps_recurring_commerce')->error(
-        'Order %oid: problems getting the charges', ['%oid' => $order->id()]
-      );
-      throw new PaymentGatewayException($exception->getMessage());
-    }
-
-    $payment->setRemoteId($charges[0]->id);
+    $payment->setRemoteId($draftAgreementResponse->getAgreementId());
     $payment->save();
 
     $order->setData('vipps_current_transaction', $draftAgreementResponse->getAgreementId());

@@ -97,10 +97,12 @@ class AgreementService {
     }
 
     $title = ' ';
+    $order_items = [];
 
     // Can be considered an initial subscription order if it has at least one
     // product which has subscription enabled.
     foreach ($order->getItems() as $order_item) {
+      $order_items[] = $order_item;
       $purchased_entity = $order_item->getPurchasedEntity();
       if (!$purchased_entity->hasField('subscription_type')) {
         continue;
@@ -159,12 +161,32 @@ class AgreementService {
     $intervalService = \Drupal::service('vipps_recurring_payments:charge_intervals');
     $intervals = $intervalService->getIntervals($frequency);
 
+    // Create a new order.
+    $order = \Drupal\commerce_order\Entity\Order::create([
+      'type' => 'Vipps Recurring Order',
+      'state' => 'draft',
+      'mail' => $order->getEmail(),
+      'uid' => $order->getCustomerId(),
+      'ip_address' => $order->getIpAddress(),
+      'billing_profile' => $order->getBillingProfile(),
+      'store_id' => $order->getStoreId(),
+      'order_items' => [$order_items],
+      'placed' => time(),
+      'payment_gateway' => $order->get('payment_gateway')->first()->entity->id(),
+      'payment_method' => $order->get('payment_method')->first()->entity->id(),
+    ]);
+    $order->save();
+    $order->setOrderNumber($order->id());
+    $order->save();
+
+
     $product = new VippsProductSubscription(
       $intervals['base_interval'],
       intval($intervals['base_interval_count']),
       $title,
       $title,
-      $initial_charge
+      $initial_charge,
+      $order->id()
     );
     $product->setPrice($agreementData->getPrice());
 
