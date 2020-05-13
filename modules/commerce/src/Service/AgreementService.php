@@ -163,7 +163,7 @@ class AgreementService {
 
     // Create a new order.
     $order = \Drupal\commerce_order\Entity\Order::create([
-      'type' => 'Vipps Recurring Order',
+      'type' => 'recurring',
       'state' => 'draft',
       'mail' => $order->getEmail(),
       'uid' => $order->getCustomerId(),
