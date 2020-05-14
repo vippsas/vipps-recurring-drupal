@@ -91,8 +91,7 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
       $agreementNodeId = $payload['agreementNodeId'];
       $agreementNode = VippsAgreements::load($agreementNodeId);
       $agreementNode->getPrice();
-      $order_id = $payload['order_id'];
-
+      $order_id = $payload['orderId'];
       $order = Order::load($order_id);
 
       $message_variables = ['%aid' => $agreementId];
@@ -116,10 +115,7 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
         return JobResult::failure('The agreement it not ACTIVE');
       }
 
-      $order_items = [];
-
       foreach ($order->getItems() as $key => $order_item) {
-        $order_items[] = $order_item;
         $product_variation = $order_item->getPurchasedEntity();
         $title = $product_variation->getTitle();
       }
@@ -128,7 +124,7 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
       $payment = Payment::create([
         'payment_gateway' => $order->get('payment_gateway')->first()->entity->id(),
         'order_id' => $order->id(),
-        'amount' => $agreementNode->getPrice()*100,
+        'amount' => $order->getTotalPrice(),
         'state' => 'new',
         'payment_method' => $order->get('payment_method')->first()->entity->id(),
       ]);
@@ -188,32 +184,20 @@ class CreateCharge extends JobTypeBase implements ContainerFactoryPluginInterfac
         $chargeNode->setDescription($charge->getDescription());
         $chargeNode->save();
 
-        // Create a new order
-        $order = \Drupal\commerce_order\Entity\Order::create([
-          'type' => 'recurring',
-          'state' => 'draft',
-          'mail' => $order->getEmail(),
-          'uid' => $order->getCustomerId(),
-          'ip_address' => $order->getIpAddress(),
-          'billing_profile' => $order->getBillingProfile(),
-          'store_id' => $order->getStoreId(),
-          'order_items' => [$order_items],
-          'placed' => time(),
-          'payment_gatewat' => $order->get('payment_gateway')->first()->entity->id(),
-        ]);
-        $order->save();
-        $order->setOrderNumber($order->id());
-        $order->save();
+        /** @var \Drupal\commerce_recurring\RecurringOrderManager $recurringOrdermanager */
+        $recurringOrdermanager = \Drupal::service('commerce_recurring.order_manager');
+
+        $nex_oder = $recurringOrdermanager->renewOrder($order);
 
         // Add new job to queue for the next charge
         $job = Job::create('create_charge_job_commerce', [
-          'orderId' => $order->id(),
+          'orderId' => $nex_oder->id(),
           'agreementId' => $agreementId,
           'agreementNodeId' => $agreementNodeId
         ]);
 
         $queue = Queue::load('vipps_recurring_payments');
-        $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($product));
+        $queue->enqueueJob($job, $this->delayManager->getCountSecondsToNextPayment($this->product));
 
         $this->logger->info(
           sprintf("Charge for %s has been done successfully", $agreementId)

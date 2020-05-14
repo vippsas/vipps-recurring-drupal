@@ -12,5 +12,7 @@ configuration:
   mode: test
   collect_billing_information: true
   initial_charge: '1'
+  payment_method_types:
+    - vipps_payment_method
 conditions: {  }
 conditionOperator: AND

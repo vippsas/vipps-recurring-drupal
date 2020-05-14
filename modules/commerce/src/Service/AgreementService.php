@@ -97,12 +97,10 @@ class AgreementService {
     }
 
     $title = ' ';
-    $order_items = [];
 
     // Can be considered an initial subscription order if it has at least one
     // product which has subscription enabled.
     foreach ($order->getItems() as $order_item) {
-      $order_items[] = $order_item;
       $purchased_entity = $order_item->getPurchasedEntity();
       if (!$purchased_entity->hasField('subscription_type')) {
         continue;
@@ -161,22 +159,30 @@ class AgreementService {
     $intervalService = \Drupal::service('vipps_recurring_payments:charge_intervals');
     $intervals = $intervalService->getIntervals($frequency);
 
-    // Create a new order.
-    $order = \Drupal\commerce_order\Entity\Order::create([
-      'type' => 'recurring',
-      'state' => 'draft',
-      'mail' => $order->getEmail(),
-      'uid' => $order->getCustomerId(),
-      'ip_address' => $order->getIpAddress(),
-      'billing_profile' => $order->getBillingProfile(),
-      'store_id' => $order->getStoreId(),
-      'order_items' => [$order_items],
-      'placed' => time(),
-      'payment_gateway' => $order->get('payment_gateway')->first()->entity->id(),
-      'payment_method' => $order->get('payment_method')->first()->entity->id(),
-    ]);
-    $order->save();
-    $order->setOrderNumber($order->id());
+    /** @var \Drupal\commerce_recurring\SubscriptionStorageInterface $subscription_storage */
+    $subscription_storage = \Drupal::entityTypeManager()->getStorage('commerce_subscription');
+    /** @var \Drupal\commerce_recurring\Entity\SubscriptionInterface[] $subscriptions */
+    $query = $subscription_storage->getQuery();
+    $query
+      ->condition('initial_order', $order->id())
+      ->condition('state', ['trial', 'active'], 'IN');
+    $result = $query->execute();
+
+    if ($result) {
+      $subscriptions = $subscription_storage->loadMultiple($result);
+      $subscription = reset($subscriptions);
+      /** @var \Drupal\commerce_order\Entity\Order $next_order */
+      $next_order = $subscription->getCurrentOrder();
+    }
+
+    if(!isset($next_order)) {
+      \Drupal::logger('vipps_recurring_commerce')->info(
+        'Order %oid: No subscription found', $message_variables
+      );
+      return;
+    }
+
+    $next_order->setOrderNumber($next_order->id());
     $order->save();
 
 
@@ -186,12 +192,12 @@ class AgreementService {
       $title,
       $title,
       $initial_charge,
-      $order->id()
+      $next_order->id()
     );
     $product->setPrice($agreementData->getPrice());
 
     $job = Job::create('create_charge_job_commerce', [
-      'orderId' => $order->id(),
+      'orderId' => $next_order->id(),
       'agreementId' => $agreementId,
       'agreementNodeId' => $agreementNodeId
     ]);

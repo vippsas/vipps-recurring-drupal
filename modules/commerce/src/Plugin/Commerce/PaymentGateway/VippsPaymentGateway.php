@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
  *   id = "vipps_recurring_checkout",
  *   label = "Vipps Recurring Checkout",
  *   display_label = "Vipps Recurring Checkout",
- *   requires_billing_information = FALSE,
+ *   requires_billing_information = TRUE,
  *   forms = {
  *     "add-payment-method" = "Drupal\vipps_recurring_payments_commerce\PluginForm\VippsPaymentMethodAddForm",
  *   },
@@ -149,8 +149,6 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
 
     $payment_method->setReusable(FALSE);
     $payment_method->phone_number = $payment_details['phone_number'];
-    $payment_method->agreement_title = $payment_details['agreement_title'];
-    $payment_method->agreement_description = $payment_details['agreement_description'];
     $payment_method->save();
   }
 
