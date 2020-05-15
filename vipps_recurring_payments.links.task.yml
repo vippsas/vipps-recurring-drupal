@@ -14,6 +14,11 @@ entity.vipps_agreements.edit_form:
   base_route: entity.vipps_agreements.canonical
   title: 'Edit'
 
+entity.vipps_agreements.cancel_form:
+  route_name:  entity.vipps_agreements.cancel_form
+  base_route:  entity.vipps_agreements.canonical
+  title: 'Cancel Agreement'
+
 entity.vipps_agreements.version_history:
   route_name: entity.vipps_agreements.version_history
   base_route: entity.vipps_agreements.canonical
@@ -24,6 +29,7 @@ entity.vipps_agreements.delete_form:
   base_route:  entity.vipps_agreements.canonical
   title: Delete
   weight: 10
+
 # Periodic charges routing definition
 periodic_charges.settings_tab:
   route_name: periodic_charges.settings

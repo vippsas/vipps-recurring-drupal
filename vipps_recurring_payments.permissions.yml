@@ -9,6 +9,9 @@ administer vipps agreements entities:
 delete vipps agreements entities:
   title: 'Delete Vipps agreements entities'
 
+cancel vipps agreements entities:
+  title: 'Cancel Vipps agreements entities'
+
 edit vipps agreements entities:
   title: 'Edit Vipps agreements entities'
 

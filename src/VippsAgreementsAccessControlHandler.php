@@ -32,6 +32,7 @@ class VippsAgreementsAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowedIfHasPermission($account, 'view published vipps agreements entities');
 
       case 'update':
+      case 'cancel':
 
         return AccessResult::allowedIfHasPermission($account, 'edit vipps agreements entities');
 
