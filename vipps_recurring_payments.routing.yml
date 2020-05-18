@@ -96,3 +96,12 @@ vipps_recurring_payments.merchant_agreement:
     _controller: Drupal\vipps_recurring_payments\Controller\AgreementController:merchantAgreement
   requirements:
     _access: 'TRUE'
+
+entity.vipps_agreements.cancel_form:
+  path: '/admin/config/vipps/vipps-agreements/{vipps_agreements}/cancel'
+  defaults:
+  # Calls the form.cancel controller, defined in the contact entity.
+    _entity_form: vipps_agreements.cancel
+    _title: 'Cancel agreement'
+  requirements:
+    _entity_access: vipps_agreements.cancel
