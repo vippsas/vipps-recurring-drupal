@@ -43,6 +43,8 @@ class VippsAgreementsCancelForm extends ContentEntityConfirmFormBase {
    * @inheritDoc
    */
   public function getCancelUrl() {
+    $entity = $this->entity;
+    return new Url('entity.vipps_agreements.collection');
   }
 
   /**
