@@ -48,7 +48,7 @@ use Drupal\user\UserInterface;
  *     "revision" = "vid",
  *     "uid" = "uid",
  *     "agreement_id" = "agreement_id",
- *     "label" = "mobile",
+ *     "label" = "agreement_id",
  *     "agreement_status" = "agreement_status",
  *     "price" = "price",
  *     "published" = "status",

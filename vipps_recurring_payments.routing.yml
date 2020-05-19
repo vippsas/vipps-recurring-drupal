@@ -78,14 +78,10 @@ vipps_recurring_payments.get_agreement:
 
 vipps_recurring_payments.cancel_agreement:
   path: '/vipps-recurring-payments/agreement/cancel'
-  methods: [PATCH]
   defaults:
     _controller: Drupal\vipps_recurring_payments\Controller\AgreementController:cancel
-  options:
-    _auth: [ 'basic_auth' ]
   requirements:
     _user_is_logged_in: 'TRUE'
-    _format: json
 
 vipps_recurring_payments.merchant_agreement:
   path: '/vrp/merchant-agreement'

@@ -5,7 +5,9 @@ namespace Drupal\vipps_recurring_payments\Form;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\vipps_recurring_payments\ResponseApiData\CancelAgreementResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Provides a form for deleting Vipps agreements entities.
@@ -33,21 +35,39 @@ class VippsAgreementsCancelForm extends ContentEntityConfirmFormBase {
    * @inheritDoc
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to cancel the agreement?', ['%arg' => $this->entity->label()]);
+    $entity = $this->entity;
+    return $this->t('Are you sure you want to cancel the agreement %arg?', ['%arg' => $entity->label()]);
   }
 
   /**
    * @inheritDoc
    */
   public function getCancelUrl() {
-    //return new Url('entity.vipps_agreements.canonical');
   }
 
   /**
    * @inheritDoc
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // TODO: Implement submitForm() method.
+    $entity = $this->entity;
+    $form_state->setRedirect('entity.vipps_agreements.canonical', ['vipps_agreements' => $entity->id()]);
+    try {
+      $vippsService = \Drupal::service('vipps_recurring_payments:vipps_service');
+      /** @var CancelAgreementResponse $response */
+      $response = $vippsService->cancelAgreement([$entity->label()])->toArray();
+    } catch (\Throwable $exception) {
+      $this->messenger()->addError($this->t($exception->getMessage()));
+      return;
+    }
+
+    if(sizeof($response["errors"]) > 0 ) {
+      $this->messenger()->addError($this->t('Unable to cancel agreement %arg', ['%arg' => $entity->label()]));
+      return;
+    }
+
+    $this->messenger()->addMessage($this->t('Agreement %arg canceled', ['%arg' => $entity->label()]));
+    $entity->set('agreement_status', 'STOPPED');
+    $entity->save();
   }
 
   /**
