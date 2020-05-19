@@ -7,11 +7,13 @@ use Drupal\advancedqueue\Entity\Queue;
 use Drupal\advancedqueue\Job;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Url;
 use Drupal\vipps_recurring_payments\Entity\PeriodicCharges;
 use Drupal\vipps_recurring_payments\Entity\VippsAgreements;
 use Drupal\vipps_recurring_payments\Entity\VippsProductSubscription;
 use Drupal\vipps_recurring_payments\Service\DelayManager;
 use Drupal\vipps_recurring_payments\Service\VippsHttpClient;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class AgreementService {
   private $httpClient;
@@ -71,11 +73,12 @@ class AgreementService {
       case 'STOPPED':
       case 'EXPIRED':
         $payment->setState('failed');
-        $order->getState()->applyTransitionById('cancel');
+        $order->set('state', 'draft');
+        $order->save();
         \Drupal::logger('vipps_recurring_commerce')->error(
           'Order %oid: Oooops, something went wrong.', $message_variables
         );
-        throw new \DomainException('Oooops, something went wrong.');
+        throw new \DomainException("Oooops, something went wrong.");
         break;
 
       default:
