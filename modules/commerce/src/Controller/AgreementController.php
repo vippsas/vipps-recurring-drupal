@@ -68,6 +68,7 @@ class AgreementController extends ControllerBase {
 
     } catch (\Throwable $e) {
       $this->messenger->addError($this->t($e->getMessage()));
+      return new RedirectResponse(Url::fromRoute('commerce_checkout.form', ['commerce_order' => $order_id, 'step' => 'review'])->toString());
     }
 
     return new RedirectResponse(Url::fromRoute('commerce_checkout.form', ['commerce_order' => $order_id, 'step' => 'complete'])->toString());

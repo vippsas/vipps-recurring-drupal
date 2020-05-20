@@ -126,7 +126,6 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
     $payment->save();
 
     $order->setData('vipps_current_transaction', $draftAgreementResponse->getAgreementId());
-    $order->getState()->applyTransitionById('place');
     $order->save();
 
     $redirect = new RedirectResponse($draftAgreementResponse->getVippsConfirmationUrl(), Response::HTTP_SEE_OTHER);
