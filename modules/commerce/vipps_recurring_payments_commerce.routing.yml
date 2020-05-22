@@ -4,15 +4,3 @@ vipps_recurring_payments.confirm_agreement:
     _controller: Drupal\vipps_recurring_payments_commerce\Controller\AgreementController:confirm
   requirements:
     _access: 'TRUE'
-
-vipps_recurring_payments_commerce.user_agreement_list:
-  path: '/user/{user}/vipps-agreement-list'
-  defaults:
-    _entity_list: 'vipps_agreements'
-    _title: 'Vipps Agreements'
-  requirements:
-    _custom_access: 'Drupal\vipps_recurring_payments\Access\VippsAgreementAccessCheck::checkAccess'
-  options:
-    parameters:
-      user:
-        type: entity:user

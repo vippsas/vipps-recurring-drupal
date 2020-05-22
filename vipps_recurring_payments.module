@@ -6,6 +6,8 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\user\Entity\Role;
 
 /**
  * Implements hook_help().
@@ -21,4 +23,36 @@ function vipps_recurring_payments_help($route_name, RouteMatchInterface $route_m
 
     default:
   }
+}
+
+function vipps_recurring_payments_install() {
+  $role_object = Role::load('manage own vipps agreements entities');
+  $role_object->grantPermission('authenticated');
+  $role_object->save();
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function vipps_recurring_payments_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
+  $operations = array();
+  $info = $entity->getEntityType();
+
+  //var_dump();
+
+  if($info->id() == 'vipps_agreements') {
+    $account = \Drupal::currentUser();
+    if ($account->hasPermission('manage own vipps agreements entities')) {
+      $operations['manage-fields'] = array(
+        'title' => t('Cancel agreement'),
+        'weight' => 15,
+        'url' => Url::fromRoute("entity.vipps_agreements.ask_cancel_form", [
+          'vipps_agreements' => $entity->id(),
+          'user' => \Drupal::currentUser()->id(),
+        ]),
+      );
+    }
+  }
+
+  return $operations;
 }

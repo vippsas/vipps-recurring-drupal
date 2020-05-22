@@ -60,6 +60,7 @@ use Drupal\user\UserInterface;
  *     "edit-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/edit",
  *     "delete-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/delete",
  *     "cancel-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/cancel",
+ *     "ask-cancel-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/cancel",
  *     "version-history" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions",
  *     "revision" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/view",
  *     "revision_revert" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/revert",
