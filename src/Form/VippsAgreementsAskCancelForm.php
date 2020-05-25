@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Provides a form for deleting Vipps agreements entities.
+ * Provides a form for user ask to cancel Vipps agreements entities.
  *
  * @ingroup vipps_recurring_payments
  */
@@ -32,6 +32,16 @@ class VippsAgreementsAskCancelForm extends ContentEntityConfirmFormBase {
   }
 
   /**
+   * Returns a unique string identifying the form.
+   *
+   * @return string
+   *   The unique string identifying the form.
+   */
+  public function getFormId() {
+    return 'user_cancel_form';
+  }
+
+  /**
    * @inheritDoc
    */
   public function getQuestion() {
@@ -43,8 +53,7 @@ class VippsAgreementsAskCancelForm extends ContentEntityConfirmFormBase {
    * @inheritDoc
    */
   public function getCancelUrl() {
-    $entity = $this->entity;
-    return new Url('entity.vipps_agreements.collection');
+    return new Url('vipps_recurring_payments.user_agreement_list', ['user' => \Drupal::currentUser()->id()]);
   }
 
   /**
@@ -52,11 +61,28 @@ class VippsAgreementsAskCancelForm extends ContentEntityConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $entity = $this->entity;
-    $form_state->setRedirect('entity.vipps_agreements.canonical', ['vipps_agreements' => $entity->id()]);
+    $form_state->setRedirect('vipps_recurring_payments.user_agreement_list', ['user' => \Drupal::currentUser()->id()]);
 
     $this->messenger()->addMessage($this->t('Thank you. Cancellation is pending administrator approval'));
-    $entity->set('agreement_status', 'Pending Cancellation');
+    $entity->set('agreement_status', 'Pending');
     $entity->save();
+
+    $send_mail = new \Drupal\Core\Mail\Plugin\Mail\PhpMail(); // this is used to send HTML emails
+    $from = 'drupal@frontkom.com';
+    $to = 'cristina@frontkom.com';
+    $message['headers'] = array(
+      'content-type' => 'text/html',
+      'MIME-Version' => '1.0',
+      'reply-to' => $from,
+      'from' => 'sender name <'.$from.'>'
+    );
+    $message['to'] = $to;
+    $message['subject'] = "Subject Goes here !!!!!";
+
+    $message['body'] = 'Hello,
+    Thank you for reading this blog.';
+
+    $send_mail->mail($message);
   }
 
   /**

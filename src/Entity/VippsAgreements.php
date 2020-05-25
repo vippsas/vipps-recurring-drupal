@@ -31,6 +31,7 @@ use Drupal\user\UserInterface;
  *       "add" = "Drupal\vipps_recurring_payments\Form\VippsAgreementsForm",
  *       "edit" = "Drupal\vipps_recurring_payments\Form\VippsAgreementsForm",
  *       "cancel" = "Drupal\vipps_recurring_payments\Form\VippsAgreementsCancelForm",
+ *       "ask" = "Drupal\vipps_recurring_payments\Form\VippsAgreementsAskCancelForm",
  *       "delete" = "Drupal\vipps_recurring_payments\Form\VippsAgreementsDeleteForm",
  *     },
  *     "route_provider" = {
@@ -60,7 +61,7 @@ use Drupal\user\UserInterface;
  *     "edit-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/edit",
  *     "delete-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/delete",
  *     "cancel-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/cancel",
- *     "ask-cancel-form" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/cancel",
+ *     "ask-cancel-form" = "/user/{user}/vipps-agreement-list/{vipps_agreements}/cancel",
  *     "version-history" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions",
  *     "revision" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/view",
  *     "revision_revert" = "/admin/config/vipps/vipps-agreements/{vipps_agreements}/revisions/{vipps_agreements_revision}/revert",

@@ -38,8 +38,6 @@ function vipps_recurring_payments_entity_operation(\Drupal\Core\Entity\EntityInt
   $operations = array();
   $info = $entity->getEntityType();
 
-  //var_dump();
-
   if($info->id() == 'vipps_agreements') {
     $account = \Drupal::currentUser();
     if ($account->hasPermission('manage own vipps agreements entities')) {
@@ -55,4 +53,42 @@ function vipps_recurring_payments_entity_operation(\Drupal\Core\Entity\EntityInt
   }
 
   return $operations;
+}
+
+/**
+ * hook_form_alter()
+ */
+
+function vipps_recurring_payments_form_alter (&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+
+  if($form_id == 'user_cancel_form') {
+    $form['actions']['submit']['#submit'][] = 'vipps_recurring_payments_html_mails'; //custom name
+  }
+}
+
+function vipps_recurring_payments_html_mails($form, \Drupal\Core\Form\FormStateInterface $form_state){
+  $user = \Drupal::currentUser();
+  $user_email = $user->getEmail();
+  $site_mail = \Drupal::config('system.site')->get('mail');
+
+  $send_mail = new \Drupal\Core\Mail\Plugin\Mail\PhpMail(); // this is used to send HTML emails
+  $from = $user_email;
+  $to = $site_mail;
+  $message['headers'] = array(
+    'content-type' => 'text/html',
+    'MIME-Version' => '1.0',
+    'reply-to' => $from,
+    'from' => 'sender name <'.$from.'>'
+  );
+  $message['to'] = $to;
+  $message['subject'] = "Subject Goes here !!!!!";
+
+  $message['body'] = 'Hello,
+  Thank you for reading this blog.';
+
+  \Drupal::logger('vipps_user_cancel_agreement')->info(
+    'Sending cancel email from %from to %to', ['%from' => $from, '%to' => $to]
+  );
+
+  $send_mail->mail($message);
 }

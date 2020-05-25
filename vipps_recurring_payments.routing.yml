@@ -110,16 +110,16 @@ entity.vipps_agreements.ask_cancel_form:
   path: '/user/{user}/vipps-agreement-list/{vipps_agreements}/cancel'
   defaults:
   # Calls the form.cancel controller, defined in the contact entity.
-    _entity_form: vipps_agreements.cancel
+    _entity_form: vipps_agreements.ask
     _title: 'Cancel agreement'
   requirements:
-    _entity_access: vipps_agreements.cancel
+    _custom_access: 'Drupal\vipps_recurring_payments\Access\VippsAgreementAccessCheck::checkAccess'
   options:
     parameters:
       user:
         type: entity:user
 
-vipps_recurring_payments_commerce.user_agreement_list:
+vipps_recurring_payments.user_agreement_list:
   path: '/user/{user}/vipps-agreement-list'
   defaults:
     _entity_list: 'vipps_agreements'
