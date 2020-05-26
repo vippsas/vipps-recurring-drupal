@@ -8,6 +8,7 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\user\Entity\Role;
+use Drupal\vipps_recurring_payments\Event\UserRequestCancelationEvent;
 
 /**
  * Implements hook_help().
@@ -60,35 +61,19 @@ function vipps_recurring_payments_entity_operation(\Drupal\Core\Entity\EntityInt
  */
 
 function vipps_recurring_payments_form_alter (&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
-
   if($form_id == 'user_cancel_form') {
-    $form['actions']['submit']['#submit'][] = 'vipps_recurring_payments_html_mails'; //custom name
+    $form['actions']['submit']['#submit'][] = 'vipps_recurring_payments_request_cancelation'; //custom name
   }
 }
 
-function vipps_recurring_payments_html_mails($form, \Drupal\Core\Form\FormStateInterface $form_state){
-  $user = \Drupal::currentUser();
-  $user_email = $user->getEmail();
-  $site_mail = \Drupal::config('system.site')->get('mail');
+function vipps_recurring_payments_request_cancelation($form, \Drupal\Core\Form\FormStateInterface $form_state){
+  /** @var \Drupal\vipps_recurring_payments\Entity\VippsAgreements $vippsAgreement */
+  $vippsAgreement = $form_state->getFormObject()->getEntity();
 
-  $send_mail = new \Drupal\Core\Mail\Plugin\Mail\PhpMail(); // this is used to send HTML emails
-  $from = $user_email;
-  $to = $site_mail;
-  $message['headers'] = array(
-    'content-type' => 'text/html',
-    'MIME-Version' => '1.0',
-    'reply-to' => $from,
-    'from' => 'sender name <'.$from.'>'
-  );
-  $message['to'] = $to;
-  $message['subject'] = "Subject Goes here !!!!!";
+  // Instantiate our event.
+  $event = new UserRequestCancelationEvent($vippsAgreement);
 
-  $message['body'] = 'Hello,
-  Thank you for reading this blog.';
-
-  \Drupal::logger('vipps_user_cancel_agreement')->info(
-    'Sending cancel email from %from to %to', ['%from' => $from, '%to' => $to]
-  );
-
-  $send_mail->mail($message);
+  // Get the event_dispatcher service and dispatch the event.
+  $event_dispatcher = \Drupal::service('event_dispatcher');
+  $event_dispatcher->dispatch(UserRequestCancelationEvent::CONFIRM_REQUEST, $event);
 }

@@ -34,3 +34,10 @@ services:
 
   vipps_recurring_payments:charge_intervals:
     class: Drupal\vipps_recurring_payments\Service\ChargeIntervals
+
+  vipps_recurring_payments.request_cancelation_subscriber:
+    # Event subscriber class that will listen for the events.
+    class: '\Drupal\vipps_recurring_payments\EventSubscriber\CancelationEventsSubscriber'
+    # Tagged as an event_subscriber to register this subscriber with the event_dispatch service.
+    tags:
+      - { name: 'event_subscriber' }
