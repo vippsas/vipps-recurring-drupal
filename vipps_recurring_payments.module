@@ -45,7 +45,7 @@ function vipps_recurring_payments_entity_operation(\Drupal\Core\Entity\EntityInt
       $operations['manage-fields'] = array(
         'title' => t('Cancel agreement'),
         'weight' => 15,
-        'url' => Url::fromRoute("entity.vipps_agreements.ask_cancel_form", [
+        'url' => Url::fromRoute("entity.vipps_agreements.request_cancel_form", [
           'vipps_agreements' => $entity->id(),
           'user' => \Drupal::currentUser()->id(),
         ]),

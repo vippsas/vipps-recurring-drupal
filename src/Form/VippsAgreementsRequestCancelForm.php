@@ -10,11 +10,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Provides a form for user ask to cancel Vipps agreements entities.
+ * Provides a form for user request to cancel Vipps agreements entities.
  *
  * @ingroup vipps_recurring_payments
  */
-class VippsAgreementsAskCancelForm extends ContentEntityConfirmFormBase {
+class VippsAgreementsRequestCancelForm extends ContentEntityConfirmFormBase {
 
   /**
    * The Vipps agreements storage.
