@@ -98,8 +98,7 @@ class VippsPaymentGateway extends BaseVippsPaymentGateway implements SupportsRef
       intval($intervals['base_interval_count']),
       $title,
       $title,
-      $initial_charge,
-      $order->id()
+      $initial_charge
     );
     $product->setPrice($order->total_price->getValue()[0]['number']);
 

@@ -194,8 +194,7 @@ class AgreementService {
       intval($intervals['base_interval_count']),
       $title,
       $title,
-      $initial_charge,
-      $next_order->id()
+      $initial_charge
     );
     $product->setPrice($agreementData->getPrice());
 
