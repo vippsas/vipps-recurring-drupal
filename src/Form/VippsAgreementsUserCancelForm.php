@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *
  * @ingroup vipps_recurring_payments
  */
-class VippsAgreementsRequestCancelForm extends ContentEntityConfirmFormBase {
+class VippsAgreementsUserCancelForm extends ContentEntityConfirmFormBase {
 
   /**
    * The Vipps agreements storage.
@@ -63,26 +63,23 @@ class VippsAgreementsRequestCancelForm extends ContentEntityConfirmFormBase {
     $entity = $this->entity;
     $form_state->setRedirect('vipps_recurring_payments.user_agreement_list', ['user' => \Drupal::currentUser()->id()]);
 
-    $this->messenger()->addMessage($this->t('Thank you. Cancellation is pending administrator approval'));
-    $entity->set('agreement_status', 'Pending');
+    try {
+      $vippsService = \Drupal::service('vipps_recurring_payments:vipps_service');
+      /** @var CancelAgreementResponse $response */
+      $response = $vippsService->cancelAgreement([$entity->label()])->toArray();
+    } catch (\Throwable $exception) {
+      $this->messenger()->addError($this->t($exception->getMessage()));
+      return;
+    }
+
+    if(sizeof($response["errors"]) > 0 ) {
+      $this->messenger()->addError($this->t('Unable to cancel agreement %arg', ['%arg' => $entity->label()]));
+      return;
+    }
+
+    $this->messenger()->addMessage($this->t('Agreement %arg canceled', ['%arg' => $entity->label()]));
+    $entity->set('agreement_status', 'STOPPED');
     $entity->save();
-
-    $send_mail = new \Drupal\Core\Mail\Plugin\Mail\PhpMail(); // this is used to send HTML emails
-    $from = 'drupal@frontkom.com';
-    $to = 'cristina@frontkom.com';
-    $message['headers'] = array(
-      'content-type' => 'text/html',
-      'MIME-Version' => '1.0',
-      'reply-to' => $from,
-      'from' => 'sender name <'.$from.'>'
-    );
-    $message['to'] = $to;
-    $message['subject'] = "Subject Goes here !!!!!";
-
-    $message['body'] = 'Hello,
-    Thank you for reading this blog.';
-
-    $send_mail->mail($message);
   }
 
   /**

@@ -45,7 +45,7 @@ function vipps_recurring_payments_entity_operation(\Drupal\Core\Entity\EntityInt
       $operations['manage-fields'] = array(
         'title' => t('Cancel agreement'),
         'weight' => 15,
-        'url' => Url::fromRoute("entity.vipps_agreements.request_cancel_form", [
+        'url' => Url::fromRoute("entity.vipps_agreements.user_cancel_form", [
           'vipps_agreements' => $entity->id(),
           'user' => \Drupal::currentUser()->id(),
         ]),
@@ -54,26 +54,4 @@ function vipps_recurring_payments_entity_operation(\Drupal\Core\Entity\EntityInt
   }
 
   return $operations;
-}
-
-/**
- * hook_form_alter()
- */
-
-function vipps_recurring_payments_form_alter (&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
-  if($form_id == 'user_cancel_form') {
-    $form['actions']['submit']['#submit'][] = 'vipps_recurring_payments_request_cancelation'; //custom name
-  }
-}
-
-function vipps_recurring_payments_request_cancelation($form, \Drupal\Core\Form\FormStateInterface $form_state){
-  /** @var \Drupal\vipps_recurring_payments\Entity\VippsAgreements $vippsAgreement */
-  $vippsAgreement = $form_state->getFormObject()->getEntity();
-
-  // Instantiate our event.
-  $event = new UserRequestCancelationEvent($vippsAgreement);
-
-  // Get the event_dispatcher service and dispatch the event.
-  $event_dispatcher = \Drupal::service('event_dispatcher');
-  $event_dispatcher->dispatch(UserRequestCancelationEvent::CONFIRM_REQUEST, $event);
 }

@@ -26,7 +26,7 @@ class VippsAgreementsHtmlRouteProvider extends AdminHtmlRouteProvider {
       $collection->add("entity.{$entity_type_id}.version_history", $cancel_route);
     }
 
-    if ($request_cancel_route = $this->getRequestCancelRoute($entity_type)) {
+    if ($user_cancel_route = $this->getUserCancelRoute($entity_type)) {
       $collection->add("entity.{$entity_type_id}.version_history", $cancel_route);
     }
 
@@ -114,12 +114,12 @@ class VippsAgreementsHtmlRouteProvider extends AdminHtmlRouteProvider {
    * @return \Symfony\Component\Routing\Route|null
    *   The generated route, if available.
    */
-  protected function getRequestCancelRoute(EntityTypeInterface $entity_type) {
-    if ($entity_type->hasLinkTemplate('request-cancel-form')) {
-      $route = new Route($entity_type->getLinkTemplate('request-cancel-form'));
+  protected function getUserCancelRoute(EntityTypeInterface $entity_type) {
+    if ($entity_type->hasLinkTemplate('user-cancel-form')) {
+      $route = new Route($entity_type->getLinkTemplate('user-cancel-form'));
       $route
         ->setDefaults([
-          '_form' => '\Drupal\vipps_recurring_payments\Form\VippsAgreementsRequestCancelForm',
+          '_form' => '\Drupal\vipps_recurring_payments\Form\VippsAgreementsUserCancelForm',
           '_title' => 'Cancel Agreement',
         ])
         ->setRequirement('_permission', 'manage own vipps agreements entities');
