@@ -38,9 +38,10 @@ function vipps_recurring_payments_install() {
 function vipps_recurring_payments_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
   $operations = array();
   $info = $entity->getEntityType();
+  $account = \Drupal::currentUser();
+  $current_user_roles = $account->getRoles();
 
-  if($info->id() == 'vipps_agreements') {
-    $account = \Drupal::currentUser();
+  if($info->id() == 'vipps_agreements' && !in_array('administrator', $current_user_roles)) {
     if ($account->hasPermission('manage own vipps agreements entities')) {
       $operations['manage-fields'] = array(
         'title' => t('Cancel agreement'),

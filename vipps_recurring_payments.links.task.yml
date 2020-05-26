@@ -19,11 +19,6 @@ entity.vipps_agreements.cancel_form:
   base_route:  entity.vipps_agreements.canonical
   title: 'Cancel Agreement'
 
-entity.vipps_agreements.user_cancel_form:
-  route_name:  entity.vipps_agreements.user_cancel_form
-  base_route:  entity.vipps_agreements.canonical
-  title: 'Cancel Agreement'
-
 entity.vipps_agreements.version_history:
   route_name: entity.vipps_agreements.version_history
   base_route: entity.vipps_agreements.canonical
