@@ -65,20 +65,23 @@ class VippsAgreementsListBuilder extends EntityListBuilder {
 
     if(isset($user)) {
       /* @var \Drupal\vipps_recurring_payments\Entity\VippsAgreements $entity */
-      $row['id'] = $entity->agreement_id->value;
+      $row['id'] = Link::createFromRoute(
+        $entity->label(),
+        'entity.vipps_agreements.edit_form',
+        ['vipps_agreements' => $entity->id()]
+      );
+      $row['name'] = $entity->mobile->value;
     } else {
       /* @var \Drupal\vipps_recurring_payments\Entity\VippsAgreements $entity */
       $row['id'] = $entity->id();
+      $row['name'] = Link::createFromRoute(
+        $entity->label(),
+        'entity.vipps_agreements.edit_form',
+        ['vipps_agreements' => $entity->id()]
+      );
     }
-
-    $row['name'] = Link::createFromRoute(
-      $entity->label(),
-      'entity.vipps_agreements.edit_form',
-      ['vipps_agreements' => $entity->id()]
-    );
-
-    $row['price'] =$entity->price->value;
-    $row['status'] =$entity->agreement_status->value;
+    $row['price'] = number_format($entity->price->value/100, 2, '.', ' ');
+    $row['status'] = $entity->agreement_status->value;
     return $row + parent::buildRow($entity);
   }
 

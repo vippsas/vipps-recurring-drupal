@@ -8,7 +8,6 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\user\Entity\Role;
-use Drupal\vipps_recurring_payments\Event\UserRequestCancelationEvent;
 
 /**
  * Implements hook_help().
@@ -24,12 +23,6 @@ function vipps_recurring_payments_help($route_name, RouteMatchInterface $route_m
 
     default:
   }
-}
-
-function vipps_recurring_payments_install() {
-  $role_object = Role::load('manage own vipps agreements entities');
-  $role_object->grantPermission('authenticated');
-  $role_object->save();
 }
 
 /**

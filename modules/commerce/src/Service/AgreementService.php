@@ -130,7 +130,7 @@ class AgreementService {
     $agreementNode->setIntervals($frequency ?? 'MONTHLY');
     $agreementNode->setAgreementId($agreementId);
     $agreementNode->setMobile($payment_method->phone_number->value);
-    $agreementNode->setPrice($agreementData->getPrice()/100);
+    $agreementNode->setPrice($agreementData->getPrice());
     $agreementNode->setCreatedTime($date);
     $agreementNode->setChangedTime($date);
     $agreementNode->setOwnerId(\Drupal::currentUser()->id());
