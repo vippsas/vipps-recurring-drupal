@@ -17,6 +17,8 @@ class VippsHttpClient {
 
   private $config;
 
+  const VERSION = '1.28';
+
   public function __construct(ClientInterface $httpClient, VippsApiConfig $config) {
 
     $this->httpClient = $httpClient;
@@ -44,6 +46,10 @@ class VippsHttpClient {
         'Content-Type' => 'application/json',
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
       'json' => $requestStorage->getData(),
     ]);
@@ -66,6 +72,10 @@ class VippsHttpClient {
         'Idempotent-Key' => $orderId . time(),
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
       'json' => $requestStorage->getData(),
     ]);
@@ -80,6 +90,10 @@ class VippsHttpClient {
       'headers' => [
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
     ]);
 
@@ -92,6 +106,10 @@ class VippsHttpClient {
       'headers' => [
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
     ]);
 
@@ -103,6 +121,10 @@ class VippsHttpClient {
       'headers' => [
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
     ]);
 
@@ -116,6 +138,10 @@ class VippsHttpClient {
         'Content-Type' => 'application/json',
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
       'json' => $requestStorage->getData(),
     ]);
@@ -129,6 +155,10 @@ class VippsHttpClient {
         'Content-Type' => 'application/json',
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
     ]);
 
@@ -153,6 +183,10 @@ class VippsHttpClient {
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
         'Idempotency-Key' => "{$agreementId}_{$chargeId}_{$requestStorage->getData()['amount']}",
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
       'json' => $requestStorage->getData()
     ]);
@@ -178,6 +212,10 @@ class VippsHttpClient {
         'Authorization' => "Bearer {$token}",
         'Ocp-Apim-Subscription-Key' => $this->config->getSubscriptionKey(),
         'Idempotency-Key' => "{$agreementId}_{$chargeId}_{$requestStorage->getData()['amount']}",
+        'Vipps-System-Name' => 'drupal',
+        'Vipps-System-Version' => \Drupal::VERSION,
+        'Vipps-System-Plugin-Name' => 'vipps-recurring-payments',
+        'Vipps-System-Plugin-Version' => $this::VERSION,
       ],
       'json' => $requestStorage->getData()
     ]);
