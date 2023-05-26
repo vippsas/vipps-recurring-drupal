@@ -1,8 +1,11 @@
 # Vipps recurring payments
 
+This module is published on [GitHub](https://github.com/vippsas/vipps-recurring-drupal).
+
+## Features
 
 ### Basic authentication
-In order to be able to send API requests to the module, you need to activate `Basic auth` module which is a part of the core and use Basic auth with all your api calls:
+In order to be able to send API requests to the module, you need to activate `Basic auth` module which is a part of the core and use Basic auth with all your API calls:
 ```json
 {
   "Content-type": "application/json",
@@ -45,7 +48,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
 }
 ```
 
-### Cancell an agreement:
+### Cancel an agreement:
 * Endpoint: `/vipps-recurring-payments/agreement/cancel`
 * Method: `POST`
 * Content-Type: `application/json`
