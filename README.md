@@ -1,5 +1,9 @@
 # Vipps recurring payments
 
+<!-- START_COMMENT -->
+💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
+<!-- END_COMMENT -->
+
 This module is published on [GitHub](https://github.com/vippsas/vipps-recurring-drupal).
 
 ## Features
