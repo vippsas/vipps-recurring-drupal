@@ -1,4 +1,14 @@
-# Vipps recurring payments
+<!-- START_METADATA
+---
+title: Recurring payments plugin
+sidebar_position: 1
+hide_table_of_contents: true
+pagination_next: null
+pagination_prev: null
+---
+END_METADATA -->
+
+# Recurring payments
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
@@ -9,7 +19,9 @@ This module is published on [GitHub](https://github.com/vippsas/vipps-recurring-
 ## Features
 
 ### Basic authentication
+
 In order to be able to send API requests to the module, you need to activate `Basic auth` module which is a part of the core and use Basic auth with all your API calls:
+
 ```json
 {
   "Content-type": "application/json",
@@ -19,23 +31,29 @@ In order to be able to send API requests to the module, you need to activate `Ba
 ```
 
 ### Test auth
+
 * Endpoint: `/vipps-recurring-payments/test/auth`
 * Method: `GET`
 * Content-Type: `application/json`
 * Response example:
-```
+
+```text
 eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NSWSIsImtpZCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NSWSJ9.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9lNTExNjUyNi01MWRjLTRjMTQtYjA4Ni1hNWNiNDcxNmJjNGIvIiwiaWF0IjoxNTg4NzcwNDA1LCJuYmYiOjE1ODg3NzA0MDUsImV4cCI6MTU4ODc3NDMwNSwiYWlvIjoiNDJkZ1lHalhYemc3UE8wcXI4QzNCV2M2cjZmYkF3QT0iLCJhcHBpZCI6IjllZjEyNjA1LTNiYzYtNDk5Yi1iZjU0LTI4Mzc4ZTQyM2I3YSIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0L2U1MTE2NTI2LTUxZGMtNGMxNC1iMDg2LWE1Y2I0NzE2YmM0Yi8iLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiRVUiLCJ0aWQiOiJlNTExNjUyNi01MWRjLTRjMTQtYjA4Ni1hNWNiNDcxNmJjNGIiLCJ1dGkiOiJMSHRnWmFQOFhrLWtMTUV2Zlg1TkFBIiwidmVyIjoiMS4wIn0.PqdB33eWX90tRWYjNhCY6TeTMdC4DMbMYasfIBapdOUTgC8lhhWMImGlOK-dbEEsJ1gRrkGVFgqaqcdbiNPfUgJAcQPl2FZj1iMxwaKq6i_I7cHEfs8sHxpZ50lYjFjXtOkecZ2N62AdA6ltE_tWdtmaVRksiTfveaViSpjQLjnvZYUIb4WYomG7IzFcof_QV2ZbxNlh6fEYMT-D-2HEoEzq2i2eH2lpu-bsJAxLpUBdgE2dvt9fmbDRAb1uzNY_ouNDfml9LXo8GINB_KUaahouXmP1itW7mZW1FXImICkLVXWDlTi3NT31jv-L4NhbwPbZDsmv1ggCa-rcbLpK_g
 ```
 
-### Get status of an agreement:
+### Get status of an agreement
+
 * Endpoint: `/vipps-recurring-payments/agreement/get`
 * Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
+
 ```json
 "agr_UVUFcx31"
 ```
+
 * Response example:
+
 ```json
 {
     "id": "agr_CUfJvfx",
@@ -52,18 +70,22 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
 }
 ```
 
-### Cancel an agreement:
+### Cancel an agreement
+
 * Endpoint: `/vipps-recurring-payments/agreement/cancel`
 * Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
+
 ```json
 [
   "agr_UVUFcx31",
   "agr_CUfJvfx"
 ]
 ```
+
 * Response example:
+
 ```json
 {
     "successes": [
@@ -75,11 +97,13 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
 }
 ```
 
-### Make charges:
+### Make charges
+
 * Endpoint: `/vipps-recurring-payments/charge/make`
 * Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
+
 ```json
 [{
  "agreement_id": "agr_UVUFcx3",
@@ -95,7 +119,9 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
  "description": "Custom description"
 }]
 ```
+
 * Response example:
+
 ```json
 {
     "successes": [
@@ -108,11 +134,13 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
 }
 ```
 
-### Get charges for an agreement:
+### Get charges for an agreement
+
 * Endpoint: `/vipps-recurring-payments/charge/get`
 * Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
+
 ```json
 [
   {
@@ -123,7 +151,9 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
   }
 ]
 ```
+
 * Response example:
+
 ```json
 {
     "successes": [
@@ -135,22 +165,26 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
 }
 ```
 
-### Cancel charges for an agreement:
+### Cancel charges for an agreement
+
 * Endpoint: `/vipps-recurring-payments/charge/cancel`
 * Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
+
 ```json
 [
-	{
-		"agreement_id": "agr_CUfJvfx",
-		"price": 123,
-    	"description": "This is description",
-    	"charge_id": "chr_ptqHYWG"
-	}
+ {
+  "agreement_id": "agr_CUfJvfx",
+  "price": 123,
+     "description": "This is description",
+     "charge_id": "chr_ptqHYWG"
+ }
 ]
 ```
+
 * Response example:
+
 ```json
 {
     "successes": [
@@ -160,22 +194,26 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
 }
 ```
 
-### Cancel charges for an agreement:
+### Refund charges for an agreement
+
 * Endpoint: `/vipps-recurring-payments/charge/refund`
 * Method: `POST`
 * Content-Type: `application/json`
 * Request content example:
+
 ```json
 [
-	{
-		"agreement_id": "agr_CUfJvfx",
-		"price": 123,
-    	"description": "This is description",
-    	"charge_id": "chr_ptqHYWG"
-	}
+ {
+  "agreement_id": "agr_CUfJvfx",
+  "price": 123,
+     "description": "This is description",
+     "charge_id": "chr_ptqHYWG"
+ }
 ]
 ```
+
 * Response example:
+
 ```json
 {
     "successes": [
