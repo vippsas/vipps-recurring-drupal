@@ -1,6 +1,6 @@
 <!-- START_METADATA
 ---
-title: Recurring payments plugin
+title: Vipps Recurring Payments
 sidebar_position: 1
 hide_table_of_contents: true
 pagination_next: null
@@ -8,13 +8,13 @@ pagination_prev: null
 ---
 END_METADATA -->
 
-# Recurring payments
+# Vipps Recurring Payments
+
+*This plugin is built and maintained by [Frontkom](https://frontkom.com/) and is hosted on [GitHub](https://github.com/vippsas/vipps-recurring-drupal).*
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
 <!-- END_COMMENT -->
-
-This module is published on [GitHub](https://github.com/vippsas/vipps-recurring-drupal).
 
 ## Features
 
