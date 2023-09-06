@@ -10,7 +10,7 @@ END_METADATA -->
 
 # Vipps Recurring Payments
 
-[![Support and development by Frontkom](./docs/images/frontkom.svg#gh-light-mode-only)![Support and development by Frontkom](./docs/images/frontkom.svg#gh-dark-mode-only)](https://frontkom.com/)
+[![Support and development by Frontkom](./docs/images/frontkom.svg#gh-light-mode-only)![Support and development by Frontkom](./docs/images/frontkom_dark.svg#gh-dark-mode-only)](https://frontkom.com/)
 
 *This plugin is hosted on [GitHub](https://github.com/vippsas/vipps-recurring-drupal).*
 
