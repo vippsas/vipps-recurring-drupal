@@ -17,7 +17,9 @@ END_METADATA -->
 
 ![MobilePay](./docs/images/mp.png) *Availability for MobilePay has not yet been determined.*
 
-*This plugin is built and maintained by [Frontkom](https://frontkom.com/) and is hosted on [GitHub](https://github.com/vippsas/vipps-recurring-drupal).*
+*This plugin is built and maintained by [Frontkom](https://frontkom.com/)
+and is hosted on [GitHub](https://github.com/vippsas/vipps-recurring-drupal).
+For support, submit an issue at [drupal.org: *Vipps Recurring Payments*](https://www.drupal.org/project/vipps_recurring_payments).*
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/plugins-ext/recurring-drupal/). 💥
@@ -229,3 +231,8 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkN0VHVoTUptRDVNN0RMZHpEMnYyeDNRS1NS
     "errors": []
 }
 ```
+
+## Support
+
+For problems with your plugin,
+submit an issue at [drupal.org: *Vipps Recurring Payments*](https://www.drupal.org/project/vipps_recurring_payments).
