@@ -13,7 +13,6 @@ END_METADATA -->
 
 ![Support and development by Frontkom ](./docs/images/frontkom.svg#gh-light-mode-only)![Support and development by Frontkom](./docs/images/frontkom_dark.svg#gh-dark-mode-only)
 
-![Vipps icon](./docs/images/vipps.png) *Only available for Vipps.*
 
 *This plugin is built and maintained by [Frontkom](https://frontkom.com/)
 and is hosted on [GitHub](https://github.com/vippsas/vipps-recurring-drupal).
