@@ -6,6 +6,7 @@ hide_table_of_contents: false
 description: Provide Vipps recurring payments for Drupal.
 pagination_next: null
 pagination_prev: null
+section: Plugins
 ---
 END_METADATA -->
 
